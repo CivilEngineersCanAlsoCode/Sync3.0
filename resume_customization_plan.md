@@ -10,7 +10,7 @@
 
 ---
 
-## 7-Phase Step-by-Step Process
+## 8-Phase Step-by-Step Process
 
 ---
 
@@ -133,7 +133,147 @@ Wait for user to respond to all questions. Update the JD Scorecard with confirme
 
 ---
 
+### Phase 5.5 — ✋ Format Selection Gate (USER INPUT REQUIRED)
+
+**Goal:** Choose the output format _before any coding begins_. The choice determines the entire rendering pipeline.
+
+**Ask the user:**
+
+> _"Which format do you want for this resume?"_
+>
+> - **Option 1 — HTML + CSS** → Single `.html` + `.css` file. Export to PDF via browser print. Best visual control, easiest brand color application with CSS variables. ATS-safe only if single-column.
+> - **Option 2 — .docx via Python** → Agent generates a `.py` script using `python-docx` that outputs a `.docx`. Most ATS-compatible format (Word is universally parsed by ATS systems). Minimal visual styling but maximum ATS safety.
+> - **Option 3 — .tex (LaTeX)** → Uses existing `Satvik_Jain_Resume.tex` template. Agent writes the `.tex` source; user compiles via Overleaf or `pdflatex`. Best typography, supports brand `\definecolor`.
+
+**Format tradeoff:**
+
+|                | HTML + CSS            | .docx (Python)     | .tex (LaTeX)        |
+| -------------- | --------------------- | ------------------ | ------------------- |
+| ATS safe       | ⚠️ single-col only    | ✅ Best            | ✅ Good             |
+| Brand colors   | ✅ CSS vars           | ❌ None            | ✅ `\definecolor`   |
+| Visual quality | ✅ High               | ⚠️ Basic           | ✅ Highest          |
+| Editability    | ✅ Easy               | ✅ Easy            | ⚠️ Needs LaTeX      |
+| Agent output   | `.html` + `.css`      | `.py` + `.docx`    | `.tex`              |
+| Compile step   | Browser → Print → PDF | `python script.py` | Overleaf / pdflatex |
+
+> ⚠️ **Do not begin coding until user selects a format.**
+
+---
+
 ### Phase 6 — Brand Color Customization
+
+**Goal:** Apply company branding using the chosen format's color system.
+
+**Option 1 (HTML + CSS):**
+
+```css
+:root {
+  --brand-primary: #XXXXXX; /* name, section headings */
+  --brand-secondary: #XXXXXX; /* dates, locations */
+  --brand-accent: #XXXXXX; /* skill labels */
+}
+```
+
+**Option 2 (.docx):** Skip colors — use neutral black/grey for ATS safety.
+
+**Option 3 (.tex):**
+
+```latex
+\definecolor{brand-primary}{HTML}{XXXXXX}
+\definecolor{brand-secondary}{HTML}{XXXXXX}
+\definecolor{brand-accent}{HTML}{XXXXXX}
+```
+
+Look up hex values in `resume_branding_cheatsheet.csv`. Visual-check before export.
+
+> **Rule:** ATS portal submissions → neutral grey/black. Brand colors only for human/recruiter/referral.
+
+---
+
+### Phase 7 — Final Review & Output Package
+
+**Goal:** Produce the complete application-ready package.
+
+**Deliverables (by format):**
+
+- HTML: `Satvik_Jain_[Company]_[Role].html` + branded `.css` + browser-printed `.pdf`
+- .docx: `Satvik_Jain_[Company]_[Role].docx` (ATS submission) + generator `.py` script
+- LaTeX: `Satvik_Jain_[Company]_[Role].tex` + compiled branded `.pdf` + neutral ATS `.pdf`
+
+**Final checklist:**
+
+- [ ] No spelling errors
+- [ ] All metrics confirmed in Phase 3
+- [ ] JD keywords appear naturally in bullets
+- [ ] Contact info is current
+- [ ] File name: `FirstName_LastName_Company_PM.[ext]`
+
+---
+
+## Dependency Graph
+
+```
+Phase 1: Ingest Inputs
+    └── Phase 2: JD Reverse-Engineering
+            └── Phase 3: Gap Analysis + User Interviews
+                    └── [USER GATE ✋ — Confirm understanding]
+                            ├── Phase 4: Bullet Rewriting
+                            │       └── Phase 5: ATS Formatting
+                            │               └── [USER GATE ✋ — Format Selection]
+                            │                       └── Phase 5.5: Pick HTML/docx/tex
+                            │                               └── Phase 6: Brand Colors
+                            │                                       └── Phase 7: Final Output
+                            └── [If gaps found] → Loop back to Phase 3
+```
+
+---
+
+## bd Task Structure (per job application)
+
+```
+Epic: Resume Customization — [Company] [Role]
+│
+├── TASK-A: Ingest inputs (PDF + Brain + JD)                [P1]
+├── TASK-B: JD Reverse-Engineering + Scorecard              [P1]  blocked by: A
+├── TASK-C: Draft Phase 3 understanding summaries           [P1]  blocked by: B
+├── TASK-D: [USER GATE] Confirm understanding + fill gaps   [P0]  blocked by: C
+├── TASK-E: Bullet rewriting (Phase 4)                      [P1]  blocked by: D
+├── TASK-F: ATS formatting pass (Phase 5)                   [P1]  blocked by: E
+├── TASK-F5: [USER GATE] Format selection (HTML/docx/tex)   [P0]  blocked by: F  ← NEW
+├── TASK-G: Brand color + format rendering (Phase 6)        [P2]  blocked by: F5
+└── TASK-H: Final output package (Phase 7)                  [P1]  blocked by: G
+```
+
+**bd CLI scaffold:**
+
+```bash
+bd create "Epic: Resume — [Company] [Role]" -t epic -p 0
+bd create "TASK-A: Ingest inputs" -t task -p 1
+bd create "TASK-B: JD reverse-engineering" -t task -p 1
+bd create "TASK-C: Draft Phase 3 understanding summaries" -t task -p 1
+bd create "TASK-D: USER GATE — confirm understanding" -t task -p 0
+bd create "TASK-E: Bullet rewriting" -t task -p 1
+bd create "TASK-F: ATS formatting pass" -t task -p 1
+bd create "TASK-F5: USER GATE — format selection (HTML/docx/tex)" -t task -p 0
+bd create "TASK-G: Brand color + format rendering" -t task -p 2
+bd create "TASK-H: Final output package" -t task -p 1
+# Chain: A→B→C→D→E→F→F5→G→H
+```
+
+---
+
+## Key Rules (Non-Negotiable)
+
+| Rule                                                   | Why                                             |
+| ------------------------------------------------------ | ----------------------------------------------- |
+| **Never write a bullet without user confirmation**     | Prevents misrepresentation                      |
+| **Mirror JD language verbatim in bullets**             | ATS keyword match                               |
+| **Lead bullets with metric impact, not action**        | Recruiter spends 6 sec on resume                |
+| **Max 3–5 bullets per role**                           | Scannability; quality > quantity                |
+| **Use Resume Brain as detail source, not PDF**         | PDF is compressed; Brain has full story         |
+| **Ask format before any coding begins**                | HTML/docx/tex require completely different code |
+| **Brand colors only for human/referral; grey for ATS** | ATS doesn't care about color                    |
+| **Always confirm interpretation before writing**       | Avoids tone/context distortion                  |
 
 **Goal:** Apply company-specific branding to the LaTeX resume to signal brand alignment visually.
 
