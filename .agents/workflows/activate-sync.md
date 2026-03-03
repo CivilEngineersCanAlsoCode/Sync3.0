@@ -93,26 +93,35 @@ Then wire all dependencies as described in `resume_customization_plan.md` Phase 
 
 ## Step 4 — Check ChromaDB Status
 
-> ✅ **MCP configured** — `chroma-self-learning` MCP server is active in `mcp_config.json`.
-> ChromaDB data lives at: `/Users/satvikjain/self-learning-system/chroma_data/`
-> Docker Desktop must be running for the MCP server to start (it runs `mcp/chroma` container on-demand).
+Run:
 
-**Health check — run this Python snippet:**
+```bash
+docker ps | grep chroma
+```
+
+**If ChromaDB container is NOT running**, start it with a **named volume** for persistent storage:
+
+```bash
+docker run -d --name chroma \
+  -v chroma_data:/chroma/chroma \
+  -p 8000:8000 \
+  chromadb/chroma
+```
+
+> ⚠️ The `-v chroma_data:/chroma/chroma` flag is **mandatory**. Without it, all career signals are lost on every Docker restart.
+> If the container already exists (stopped): `docker start chroma`
+
+**After ChromaDB is confirmed running**, perform a health check:
 
 ```python
 import chromadb
-
-CHROMA_PATH = "/Users/satvikjain/self-learning-system/chroma_data"
-client = chromadb.PersistentClient(path=CHROMA_PATH)
-
-# Sync uses its own collection — separate from self-learning data
-col = client.get_or_create_collection("sync_career_signals")
+client = chromadb.HttpClient(host="localhost", port=8000)
+col = client.get_or_create_collection("career_signals")
 count = col.count()
-print(f"Sync ChromaDB health: {count} career signals indexed.")
-print(f"Data path: {CHROMA_PATH}")
+print(f"ChromaDB health: {count} career signals indexed.")
 ```
 
-- If `count > 0` → signals intact, proceed to Step 4b.
+- If `count > 0` → signals are intact, proceed to Step 4b.
 - If `count == 0` and `Resume Brain/chroma_backup_*.json` exists → auto re-ingest from backup:
   ```python
   import json, glob
@@ -121,9 +130,9 @@ print(f"Data path: {CHROMA_PATH}")
   col.add(documents=data["documents"], metadatas=data["metadatas"], ids=data["ids"])
   print(f"Re-ingested {len(data['ids'])} signals from backup.")
   ```
-- If `count == 0` and no backup exists → proceed to Step 6 (full ingestion).
+- If `count == 0` and no backup exists → trigger Step 6 (full ingestion).
 
-**After every ingestion session (Step 6), export a JSON backup:**
+**After every ingestion session (Step 6), export a JSON backup automatically:**
 
 ```python
 backup_data = col.get(include=["documents", "metadatas"])
@@ -134,10 +143,7 @@ json.dump(backup_data, open(fname, "w"), indent=2)
 print(f"Backup saved: {fname}")
 ```
 
-> 💡 Collection `sync_career_signals` keeps Sync data isolated from your existing `self-learning-system` ChromaDB data.
-> Both collections share the same SQLite file but are fully independent.
-
-Proceed to Step 4b.
+If ChromaDB is running and healthy, proceed to Step 4b.
 
 ## Step 4b — Connect Obsidian Vault + Existing Resume ⭐ NEW
 
