@@ -99,13 +99,51 @@ Run:
 docker ps | grep chroma
 ```
 
-If ChromaDB is not running, print the following message to the user and pause:
+**If ChromaDB container is NOT running**, start it with a **named volume** for persistent storage:
 
-> "⚠️ ChromaDB requires Docker to be active. Please open Docker Desktop and run:
-> `docker run -d --name chroma -p 8000:8000 chromadb/chroma`
-> Then type `/activate-sync` again to continue."
+```bash
+docker run -d --name chroma \
+  -v chroma_data:/chroma/chroma \
+  -p 8000:8000 \
+  chromadb/chroma
+```
 
-If ChromaDB is running, proceed to Step 4b.
+> ⚠️ The `-v chroma_data:/chroma/chroma` flag is **mandatory**. Without it, all career signals are lost on every Docker restart.
+> If the container already exists (stopped): `docker start chroma`
+
+**After ChromaDB is confirmed running**, perform a health check:
+
+```python
+import chromadb
+client = chromadb.HttpClient(host="localhost", port=8000)
+col = client.get_or_create_collection("career_signals")
+count = col.count()
+print(f"ChromaDB health: {count} career signals indexed.")
+```
+
+- If `count > 0` → signals are intact, proceed to Step 4b.
+- If `count == 0` and `Resume Brain/chroma_backup_*.json` exists → auto re-ingest from backup:
+  ```python
+  import json, glob
+  backup = sorted(glob.glob("Resume Brain/chroma_backup_*.json"))[-1]
+  data = json.load(open(backup))
+  col.add(documents=data["documents"], metadatas=data["metadatas"], ids=data["ids"])
+  print(f"Re-ingested {len(data['ids'])} signals from backup.")
+  ```
+- If `count == 0` and no backup exists → trigger Step 6 (full ingestion).
+
+**After every ingestion session (Step 6), export a JSON backup automatically:**
+
+```python
+backup_data = col.get(include=["documents", "metadatas"])
+backup_data["ids"] = col.get()["ids"]
+import json, datetime
+fname = f"Resume Brain/chroma_backup_{datetime.date.today()}.json"
+json.dump(backup_data, open(fname, "w"), indent=2)
+print(f"Backup saved: {fname}")
+```
+
+If ChromaDB is running and healthy, proceed to Step 4b.
 
 ## Step 4b — Connect Obsidian Vault + Existing Resume ⭐ NEW
 

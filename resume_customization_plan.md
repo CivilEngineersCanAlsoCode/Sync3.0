@@ -123,6 +123,10 @@ Run the full empathetic multi-step interview below.
 
 > ℹ️ **Tone:** Behave like a college senior helping a friend build their first strong resume. Be warm, practical, and encouraging. Acknowledge uncertainty. Suggest reasonable assumptions when exact data isn't available.
 
+> 📊 **Progress:** Print a progress indicator before every question: `[Session A of 5 | Question 1 of 6 | ~30 min total remaining]`
+> 💾 **Auto-save:** After each session completes, save answers to `Resume Brain/interview_progress.json`. If `/activate-sync` is re-run, detect this file and skip completed sessions automatically.
+> 🔘 **Optional Sessions:** Sessions C, D, E are marked OPTIONAL after A+B complete. User can proceed with partial profile and return later.
+
 The interview is broken into 5 sequential sessions. Each session can be paused and resumed.
 
 **Session A: Who Are You?**
@@ -195,11 +199,25 @@ Last one — and this one is really important for matching you to the right role
 
 ---
 
-### Step 1.2 — ChromaDB Ingestion (Q&A Chunked Format) ⭐ UPDATED
+### Step 1.2 — ChromaDB Ingestion (Q&A Chunked Format)
 
 After the profile is confirmed, ingest all career signals into ChromaDB.
 
-**Chunking Strategy (Industry Best Practice):**
+**Step 1.2a — Obsidian Vault Relevance Filter (Pre-Ingestion Gate)**
+
+Before any Obsidian `.md` file is chunked, run a relevance check:
+
+```
+Prompt: "Does this note contain career-relevant information about work experience,
+projects, achievements, skills, or academic background? Answer: Yes or No only."
+```
+
+- **Yes** → proceed to chunking for this file
+- **No** → skip this file, log filename to `Resume Brain/vault_skipped_files.log`
+
+Print summary after filter: `"Relevant: [N] files | Skipped: [N] files (logged to vault_skipped_files.log)"`
+
+**Step 1.2b — Chunking Strategy (Industry Best Practice):**
 
 All data is stored as **self-contained Q&A pairs** — each chunk is written so it carries full context about which company, role, and time period it refers to, making retrieval maximally precise.
 
@@ -329,6 +347,34 @@ body {
 
 > 🔒 Once created, `Base_Template.html` is **immutable**. Use `/edit-template` for any future changes.
 
+**Bullet Character Limit Auto-Calibration:**
+
+Immediately after the template is created, inject this JS snippet and open it in a browser. The script measures the actual pixel width of the `.dsc` column and stores the correct character limit:
+
+```html
+<!-- In Base_Template.html, inside <script> tag -->
+<script>
+  window.addEventListener("load", function () {
+    const dscCell = document.querySelector("td.dsc");
+    if (!dscCell) return;
+    const pxWidth = dscCell.getBoundingClientRect().width;
+    // Calibri/Segoe UI 9pt ≈ 5.8px avg char width
+    const charLimit = Math.floor(pxWidth / 5.8);
+    console.log("BULLET_CHAR_LIMIT:", charLimit);
+    document.title = "CHAR_LIMIT: " + charLimit;
+  });
+</script>
+```
+
+Read the `BULLET_CHAR_LIMIT` value from the browser console, then store it as a locked comment in `Base_Template.html`:
+
+```html
+<!-- BULLET_CHAR_LIMIT: 44 -->
+<!-- This value is auto-calibrated. Do not change manually. Re-run calibration after any CSS changes. -->
+```
+
+All Phase 6.7 bullet validation reads `BULLET_CHAR_LIMIT` from this comment — never the hardcoded 82–92 value.
+
 ---
 
 ## EPIC 3: GitHub Setup
@@ -401,36 +447,50 @@ Company,Website,Role,JD
 Google,https://google.com,PM - Search,"Full JD text..."
 ```
 
-### Step 4.2 — JD Parsing → Confidence Check ⭐ UPDATED
+### Step 4.2 — JD Parsing → Hard/Soft Classification → Confidence Check
 
-Parse the JD into a structured schema:
+Parse the JD into a structured schema. **After parsing, immediately classify each requirement** using Claude:
 
 ```json
 {
   "company": "Google",
   "role": "PM - Search",
-  "required_skills": ["AI/ML", "Search Ranking", "Data-Driven"],
+  "required_skills": [
+    { "skill": "AI/ML leadership", "skill_type": "Hard" },
+    { "skill": "Search Ranking", "skill_type": "Hard" },
+    { "skill": "Cross-functional execution", "skill_type": "Hard" },
+    { "skill": "JIRA / Agile tooling", "skill_type": "Nice" },
+    { "skill": "Voice UI experience", "skill_type": "Soft" }
+  ],
   "required_metrics": ["DAU", "Latency", "Engagement"],
   "seniority_signals": ["cross-functional", "ambiguous environments"],
   "keyword_cluster": ["Agentic", "LLM", "Retrieval systems"]
 }
 ```
 
-Then immediately query ChromaDB for top-8 signals. Calculate initial **Context Confidence Score**:
+**Classification prompt for Claude:**
+
+> "For each JD requirement below, classify it as: Hard (candidate will be screened OUT without it), Soft (differentiates candidates but not a dealbreaker), or Nice (helpful but rarely assessed). Return as JSON with skill_type field."
+
+Then query ChromaDB for top-8 signals and calculate **Context Confidence Score** (Hard skills only):
 
 ```
-Confidence = (JD skills with matching evidence) / (total JD required skills) × 100
+Confidence = (Hard skills with matching evidence) / (total Hard skills) × 100
 ```
 
-- If **Confidence ≥ 90%** → proceed directly to Epic 5 (Confidence Gate)
-- If **Confidence < 90%** → trigger **Gap Interview Loop** (below)
-- If gap is **uncoverable** (user has truly zero experience in skill) → proceed anyway but flag it for strength penalty in match score
+> ⚠️ **Only Hard skills count toward the confidence gate.**
+> Soft and Nice misses apply zero gate penalty (they still affect match score at tiered rates — see Epic 5).
+
+- If **Confidence ≥ 90% on Hard skills** → proceed directly to Epic 5 (Confidence Gate)
+- If **Confidence < 90% on Hard skills** → trigger **Gap Interview Loop** (Step 4.3)
+- If gap is **uncoverable** (user has truly zero experience) → proceed with flag + strength penalty
 
 ### Step 4.3 — Gap Interview Loop (if Confidence < 90%)
 
 > 🧠 Tone: Still warm and supportive — like a senior helping before an interview.
+> ⏱️ **Max 3 questions per JD** — top-3 Hard skill gaps by JD keyword frequency only. All remaining gaps are written to `Input/gap_queue.md` with a -10 penalty pre-applied. The user can answer them asynchronously at any time.
 
-For each gap skill, ask one targeted question:
+For each of the top-3 gap skills, ask one targeted question:
 
 ```
 I noticed this role at Google requires "Search Ranking experience" — I don't see anything about this
@@ -457,20 +517,54 @@ Even indirectly — like A/B testing content ordering, or building a feed algori
    you can share them here and I'll add them to your profile. Or type 'skip' to continue.
    ```
 
-3. **User skips** → proceed but apply -10 pts to match score per unresolved gap
+3. **User skips** → proceed but apply -10 pts to match score per unresolved Hard gap
 
-After loop:
+**Remaining gaps (beyond top-3)** are auto-written to `Input/gap_queue.md`:
 
 ```
-Updated Confidence Score: [X]%
-Unresolved gaps: [list]
-→ These will reduce your overall Application Strength Score.
-Proceed to resume customization? (yes/no)
+📋 Gap Queue — Google PM - Search
+
+4. No evidence of: "JIRA / Agile tooling" (Soft — penalty: 0 pts)
+5. No evidence of: "Voice UI experience" (Soft — penalty: 0 pts)
+
+Answer any of these later to improve your profile for future applications.
+```
+
+After the 3-question loop:
+
+```
+Updated Confidence Score: [X]% (Hard skills only)
+Deferred to gap_queue.md: [N] gaps
+→ Unresolved Hard gaps reduce your Application Strength Score.
+Proceed to Epic 5 confidence gate? (yes/no)
 ```
 
 ### Step 4.4 — ChromaDB Retrieval (PM-SYNC-13)
 
 After confidence gate passes, query ChromaDB → top-8 most relevant signal entries for this JD.
+
+**Retrieval Spot-Check (mandatory before Phase 6.2):**
+
+Before any content is drafted, show the retrieved signals to the user:
+
+```
+🔍 Retrieval Spot-Check — Google PM - Search
+
+I will build your resume from these 8 experience signals:
+
+1. [Amex] Spearheaded AML scoring model handling 30M+ daily txns...
+2. [Sprinklr] Led Walmart Gen-AI support assistant (100K+ calls)...
+3. [Sprinklr] Unsupervised ML clustering reduced support tickets 40%...
+4. ...
+
+Do these feel highly relevant to this role? (confirm / replace [N] / re-rank)
+```
+
+- User confirms → proceed to Epic 5
+- User replaces → run a new ChromaDB query with updated keywords, re-show
+- User re-ranks → reorder signals by relevance, proceed
+
+No resume is drafted until signals are confirmed.
 
 ---
 
@@ -497,16 +591,51 @@ Application Strength: 78/100
 Skill coverage:      +52 pts (6/8 JD skills covered)
 Metric alignment:    +16 pts (4 matching KPI types)
 Tagbar fit:          +10 pts (all 4 tagbar slots map to JD)
-Unresolved gaps:     -10 pts (Voice UI gap unaddressed)
+Penalties:
+  Hard miss (Voice UI):    -10 pts  ← unresolved Hard gap
+  Soft miss (Voice UX):      0 pts  ← Soft gaps never penalized
+  Prep given (Search Rank): -5 pts  ← partial credit (theoretical prep provided)
 ──────────────────────────────
-Target: ≥90/100 for a strong application
+Final: 63/100 | Target: ≥90/100 for a strong application
 ```
 
-### Step 5.3 — Gate Decision
+**Penalty Tiers:**
+| Gap Type | Evidence | Penalty |
+|----------|----------|---------|
+| Hard skill | No experience, no prep | -10 pts |
+| Hard skill | Theoretical prep given | -5 pts |
+| Soft skill | Any gap | 0 pts |
+| Nice-to-have | Any gap | 0 pts |
 
-- Score ≥ 90% → Proceed to Epic 6 (Resume Customization Engine)
-- Score 75–89% → Warn user: "This is a workable application but below ideal. Continue?"
-- Score < 75% → Hard warn + ask user to run another gap interview loop or skip this opening
+### Step 5.3 — Gate Decision (With Override)
+
+The gate **never blocks** — it informs. All scores display the same 3 options:
+
+```
+Application Strength: 63/100
+
+Options:
+  [A] Continue anyway  — proceed with current signals
+  [B] Answer gap questions — run more gap interview loops
+  [C] Skip this role  — move to next CSV row
+
+Note: If Override=true in job_batch.csv, gate is bypassed automatically.
+```
+
+- Score ≥ 90% → Auto-proceed with confirmation
+- Score 75–89% → Show options, recommend [A] or [B]
+- Score < 75% → Show options, recommend [B] first, warn that [A] produces a weaker application
+
+**CSV Override Flag:**
+Add an `Override` column to `Input/job_batch.csv` for batch runs:
+
+```csv
+Company,Website,Role,JD,Override
+Google,https://google.com,PM - Search,"JD text...",false
+Amex,https://amex.com,Senior PM,"JD text...",true
+```
+
+When `Override=true`, the gate step is skipped entirely and the system proceeds to Epic 6 at whatever score it has.
 
 ---
 
@@ -528,24 +657,40 @@ Draft full content in `Sync/<Company>/<Role>/content_draft.md`:
 
 **Non-Negotiable Rules:**
 
-| Rule                | Standard                                                        |
-| ------------------- | --------------------------------------------------------------- |
-| Bullet format       | Google XYZ: "Accomplished [X] as measured by [Y] by doing [Z]"  |
-| Character count     | 82–88 chars per bullet (9pt Segoe UI / Calibri on A4)           |
-| Line count          | Exactly 1 line per bullet — zero wrapping                       |
-| Bold keywords       | 2–4 bold terms per bullet                                       |
-| Metric density      | At least 1 number/% per bullet                                  |
-| Fabrication rule    | NEVER invent metrics — verified signal pool only                |
-| Trailing adjustment | Max 10 `&nbsp;` for micro gaps (<3mm). Rephrase for major gaps. |
+| Rule                | Standard                                                            |
+| ------------------- | ------------------------------------------------------------------- |
+| Bullet format       | Google XYZ: "Accomplished [X] as measured by [Y] by doing [Z]"      |
+| Character count     | Read from `<!-- BULLET_CHAR_LIMIT: N -->` in Base_Template.html     |
+| Line count          | Exactly 1 line per bullet — zero wrapping                           |
+| Bold keywords       | 2–4 bold terms per bullet                                           |
+| Metric density      | At least 1 number/% per bullet                                      |
+| Fabrication rule    | NEVER invent metrics — verified signal pool only                    |
+| Trailing adjustment | Max 10 `&nbsp;` for micro gaps (<3mm). Rephrase for major gaps.     |
+| Sub-header tags     | Max 20 chars per tag phrase (3 × 20 + 2 pipes fits safely in `.c4`) |
 
-### Phase 6.3 — Brand Research
+### Phase 6.3 — Brand Research (with Registry + Fallback)
 
-Search for `<company> official brand colors hex`. Map to:
+**Step 1 — Check `brand_colors.json` registry first:**
+
+```python
+import json
+registry = json.load(open('brand_colors.json'))
+colors = registry.get(company_name.lower())
+if colors:
+    primary, secondary, accent = colors['primary'], colors['secondary'], colors['accent']
+else:
+    # Step 2: Web search for official brand colors
+    # search: "<company> official brand colors hex code"
+    # If not found: Step 3 — use neutral premium fallback
+    primary, secondary, accent = '#1a1a2e', '#16213e', '#0f3460'
+```
+
+Map to CSS variables:
 
 ```css
---color-primary: #HEX;
---color-secondary: #HEX;
---color-accent: #HEX;
+--color-primary: #HEX; /* Primary brand color → section headers */
+--color-secondary: #HEX; /* Secondary → tagbar background */
+--color-accent: #HEX; /* CTA / link color */
 ```
 
 ### Phase 6.4 — HTML Assembly
@@ -569,6 +714,8 @@ Pipe-separated, light background `.sub` rows only:
 
 Format: `Company | Role Title | Tag1 | Tag2 | Tag3 | Date`
 
+> ✅ Tag enforcement: Each of Tag1, Tag2, Tag3 must be **≤ 20 characters** including spaces. Validate at Phase 6.2 draft stage before assembly.
+
 ### Phase 6.6 — Date Column Validation (HARD STOP)
 
 - Assert `.c5 ≥ 14.5%`
@@ -577,36 +724,108 @@ Format: `Company | Role Title | Tag1 | Tag2 | Tag3 | Date`
 
 ### Phase 6.7 — Bullet Line Validation (HARD STOP)
 
-- Run char count on each `<li>` (target: 82–92)
-- Apply `stretch-1` for 75–81 char range
-- Rephrase (add genuine context) for bullets under 75 chars
-- Trim for bullets over 92 chars
+- Read `BULLET_CHAR_LIMIT` from `<!-- BULLET_CHAR_LIMIT: N -->` in the HTML comment
+- Run char count on each `<li>` using `BULLET_CHAR_LIMIT` as the target (not hardcoded 82–92)
+- Apply `text-align-last: justify` on `.dsc li` to auto-snap bullets to right margin
+- Apply `stretch-1` class for bullets in the 75% threshold range
+- Rephrase (add genuine context) for bullets significantly under budget
+- Trim lowest-value words for bullets over budget
 - Assert zero `<br>` inside any `<li>`
 
-### Phase 6.8 — Compression Pass (1 Page Hard Stop)
+### Phase 6.8 — Compression Pass + Puppeteer Validation
 
-- Render HTML → check height vs 297mm
-- Overflow: reduce spacer heights + line-height
-- Underflow: increase spacers or font-size by 0.5pt steps
-- Repeat until page is exactly full
+```bash
+npx puppeteer@latest node -e "
+const puppeteer = require('puppeteer');
+async function validate() {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setViewport({ width: 794, height: 1123 });
+  await page.goto('file://' + process.argv[2]);
+  const height = await page.evaluate(() => document.body.scrollHeight);
+  const overflows = height > 1123;
+  console.log(overflows ? 'OVERFLOW: ' + height + 'px > 1123px' : 'OK: fits 1 page');
+  await browser.close();
+}
+validate();
+" -- Sync/<Company>/<Role>/resume.html
+```
+
+- If `OVERFLOW` → reduce spacer heights (6px → 4px), reduce `.dsc` line-height (1.35 → 1.28), re-run
+- If content too short → increase spacers or font-size by 0.5pt steps
+- Repeat until Puppeteer reports `OK: fits 1 page`
+- Save `validation_report.json` with timestamp and final height to `Sync/<Company>/<Role>/`
 
 ### Phase 6.9 — Match Score Calculation
 
-- +10 pts per JD keyword present in resume
+- +10 pts per JD Hard keyword present in resume
+- +5 pts per JD Soft keyword present in resume
 - +5 pts per matching metric type
 - +5 pts if all 4 tagbar slots map to JD signals
-- -10 pts per unresolved gap (from Epic 5)
+- Hard miss (no prep): -10 pts | Hard miss (prep given): -5 pts
+- Soft miss: 0 pts | Nice-to-have miss: 0 pts
 - Cap at 100. Target: ≥90/100.
 
-### Phase 6.10 — GitHub Push + README Update
+### Phase 6.10 — GitHub Push + Version Control + GH Pages
+
+**Step A — Version Copy (FIX-13):**
+Before overwriting any existing `resume.html`, copy it to a versions archive:
+
+```bash
+mkdir -p Sync/<Company>/<Role>/versions
+cp Sync/<Company>/<Role>/resume.html Sync/<Company>/<Role>/versions/resume_$(date +%Y-%m-%d).html
+```
+
+**Step B — Commit with descriptive message:**
 
 ```bash
 git add Sync/<Company>/<Role>/
-git commit -m "feat: add resume for <Company> - <Role> (score: XX/100)"
-git push
+git commit -m "feat: <Company> - <Role> resume (score: XX/100)"
+git push sync main
 ```
 
-Auto-update `README.md` dashboard table with new row.
+**Step C — Poll GitHub Pages before writing live URL (FIX-10):**
+
+```bash
+# Poll until status = "built" or timeout at 5 min
+for i in $(seq 1 30); do
+  STATUS=$(curl -s -H "Authorization: token $GH_TOKEN" \
+    https://api.github.com/repos/$REPO/pages/builds/latest | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+  if [ "$STATUS" = "built" ]; then echo "Pages live"; break; fi
+  echo "Waiting ($i/30)..."; sleep 10
+done
+```
+
+Only write the `https://` URL to `application_details.md` **after** `status = "built"`.
+If timeout → write `[⏳ Building — check in 2 min](https://url)` as placeholder.
+
+**Step D — Idempotent README regeneration (FIX-08):**
+
+```bash
+# Regenerate README.md from scratch using all application_details.md files
+python3 - <<'EOF'
+import os, re
+rows = []
+for root, dirs, files in os.walk('Sync'):
+    for f in files:
+        if f == 'application_details.md':
+            content = open(os.path.join(root,f)).read()
+            company = os.path.basename(os.path.dirname(root))
+            role = os.path.basename(root)
+            score = re.search(r'Match Score: (\d+)/100', content)
+            url = re.search(r'https://[^\s)]+resume\.html', content)
+            rows.append((company, role,
+                score.group(1)+'/100' if score else '?',
+                f'[View]({url.group(0)})' if url else 'Building...'))
+header = '# Sync — Resume Portfolio\n\n| # | Company | Role | Score | Resume |\n|---|---------|------|-------|--------|\n'
+table = ''.join(f'| {i+1} | {r[0]} | {r[1]} | {r[2]} | {r[3]} |\n' for i,r in enumerate(rows))
+open('README.md','w').write(header + table)
+print(f'README updated: {len(rows)} applications')
+EOF
+git add README.md
+git commit -m "docs: regenerate README dashboard"
+git push sync main
+```
 
 Create `Sync/<Company>/<Role>/application_details.md`:
 
