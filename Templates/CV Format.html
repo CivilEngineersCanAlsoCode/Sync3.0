@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satvik Jain - CV</title>
+<style>
+  :root {
+    --color-primary: #2D2D2D;
+    --color-secondary: #808080;
+    --color-tertiary: #D9D9D9;
+    --color-accent: #1a1a1a;
+    --color-border: #888888;
+    --text-on-primary: #FFFFFF;
+    --text-on-secondary: #000000;
+    --text-on-tertiary: #000000;
+    --text-body: #000000;
+    --highlight-bar-bg: #808080;
+    --highlight-bar-text: #FFFFFF;
+    --footer-bg: #2D2D2D;
+    --footer-text: #FFFFFF;
+    --ff: 'Segoe UI', Calibri, Arial, sans-serif;
+  }
+  /*
+   COMPANY PALETTES - copy into :root to apply
+
+   Google:
+     --color-primary:#1A73E8; --color-secondary:#A8C7FA; --color-tertiary:#E8F0FE;
+     --color-accent:#1A73E8; --text-on-secondary:#0D3B66;
+     --highlight-bar-bg:#4285F4; --footer-bg:#1A73E8;
+
+   Amazon:
+     --color-primary:#232F3E; --color-secondary:#FF9900; --color-tertiary:#FFF3E0;
+     --color-accent:#E68A00; --text-on-secondary:#232F3E;
+     --highlight-bar-bg:#FF9900; --highlight-bar-text:#232F3E;
+
+   McKinsey:
+     --color-primary:#003A6C; --color-secondary:#6DAED5; --color-tertiary:#E6F0F7;
+     --color-accent:#003A6C; --text-on-secondary:#002244;
+     --highlight-bar-bg:#6DAED5; --highlight-bar-text:#002244; --footer-bg:#003A6C;
+
+   American Express:
+     --color-primary:#006FCF; --color-secondary:#97C1E7; --color-tertiary:#E8F4FD;
+     --color-accent:#006FCF; --text-on-secondary:#003366;
+     --highlight-bar-bg:#006FCF; --footer-bg:#006FCF;
+  */
+  *{margin:0;padding:0;box-sizing:border-box}
+  @page{size:A4;margin:0}
+  body{font-family:var(--ff);font-size:8pt;color:var(--text-body);background:#e8e8e8;line-height:1.22}
+  .page{width:210mm;min-height:auto;margin:8px auto;background:#fff;padding:5mm 6mm 4mm 6mm;box-shadow:0 2px 10px rgba(0,0,0,.15);position:relative}
+  @media print{body{background:#fff;margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{margin:0;padding:5mm 6mm 4mm 6mm;box-shadow:none;width:100%;min-height:auto}}
+
+  .header{display:flex;align-items:baseline;margin-bottom:2px}
+  .name{font-size:15pt;font-weight:700;letter-spacing:.2px}
+  .meta{font-size:10pt;font-weight:400;color:#444;margin-left:6px}
+
+  .tagbar{display:flex;background:var(--highlight-bar-bg);color:var(--highlight-bar-text);font-size:7pt;font-weight:600;border:1px solid var(--color-border);border-bottom:none}
+  .tagbar .t{flex:1;text-align:center;padding:2.5px 3px;border-right:1px solid var(--color-border)}
+  .tagbar .t:last-child{border-right:none}
+
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:7.5pt}
+  colgroup .c0{width:3.9%}colgroup .c1{width:12%}colgroup .c2{width:35.9%}
+  colgroup .c3{width:11.9%}colgroup .c4{width:30.3%}colgroup .c5{width:5.9%}
+  td{border:1px solid var(--color-border);padding:2px 4px;vertical-align:top}
+
+  .sh td{background:var(--color-primary);color:var(--text-on-primary);font-weight:700;font-size:7.5pt;text-transform:uppercase;letter-spacing:.4px;padding:3px 5px}
+  .sh .al{text-align:left}.sh .ar{text-align:right;font-size:7pt}
+
+  .sub td{background:var(--color-secondary);color:var(--text-on-secondary);font-weight:600;font-size:7pt;text-align:center;padding:2px 4px}
+  .sub .tl{text-align:left}.sub .tr{text-align:right}
+
+  .lbl{background:var(--color-tertiary)!important;color:var(--text-on-tertiary);font-weight:600;font-size:7pt;text-align:center!important;vertical-align:middle!important;line-height:1.15}
+
+  .dsc{font-size:7.5pt;line-height:1.25;padding:1.5px 4px}
+  .dsc ul{margin:0;padding-left:12px}.dsc li{margin-bottom:.5px}
+
+  .yr{text-align:center!important;vertical-align:middle!important;font-size:7pt}
+  .ac{text-align:center;vertical-align:middle!important;font-size:7pt}
+
+  .vlbl{background:var(--color-tertiary)!important;writing-mode:vertical-lr;text-orientation:mixed;text-align:center!important;vertical-align:middle!important;font-weight:700;font-size:6.5pt;letter-spacing:1.5px;text-transform:uppercase;padding:2px 1px!important}
+
+  .hob td{font-size:7pt;text-align:center}
+  .hob .hi{background:#fff;font-weight:400}
+
+  .footer{background:var(--footer-bg);color:var(--footer-text);font-size:7pt;text-align:center;padding:3px 8px;border:1px solid var(--color-border);border-top:none}
+  .footer span{margin:0 12px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <span class="name">Satvik Jain</span>
+    <span class="meta">| Male | 27</span>
+  </div>
+
+  <div class="tagbar">
+    <div class="t">IIT Delhi Alumnus</div>
+    <div class="t">American Express</div>
+    <div class="t">Offered Product Manager Role</div>
+    <div class="t">4+ Years Product Experience</div>
+  </div>
+
+  <table>
+    <colgroup><col class="c0"><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"></colgroup>
+
+    <!-- ===== PROFESSIONAL EXPERIENCE ===== -->
+    <tr class="sh"><td colspan="5" class="al">Professional Experience</td><td class="ar">47 Months</td></tr>
+
+    <!-- AMERICAN EXPRESS -->
+    <tr class="sub">
+      <td colspan="2" class="tl">American Express</td>
+      <td>Senior Associate Product Manager</td>
+      <td colspan="2">AML Risk | Compliance | AI/ML</td>
+      <td>07/2024 &ndash; Present</td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Product<br>Impact</td>
+      <td class="dsc" colspan="4"><ul>
+        <li><b>Modernized</b> AML Risk scoring engine powering real-time fraud alerts for <b>30M+ daily transactions</b> across <b>40+ markets</b>, delivering a 3-year modernization roadmap in <b>6 months</b></li>
+        <li><b>Drove 20+ UX research sessions</b> with compliance analysts/managers, translating insights into user journeys for <b>3 innovative capabilities</b>: Asset Manager, Advanced Rule Configurations &amp; Sandbox Versioning, <b>improving usability by 50%</b></li>
+      </ul></td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Leadership &amp;<br>Recognition</td>
+      <td class="dsc" colspan="4"><ul>
+        <li><b>Led</b> an <b>18-member scrum team</b> to deliver end-to-end product modernization, winning <b>Leadership Award &amp; 6000 Blue Rewards</b> for outstanding cross-functional execution</li>
+      </ul></td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Innovation</td>
+      <td class="dsc" colspan="4"><ul>
+        <li><b>Championed</b> AI-driven Backlog grooming &amp; Solutioning MVP with 6 members, ranking <b>#33 out of 400+ global teams</b> in Amex Growth Hack 2025 &amp; evolving it into an <b>Agentic-Agile development framework</b> for rapid prototyping</li>
+      </ul></td>
+    </tr>
+
+    <!-- SPRINKLR -->
+    <tr class="sub">
+      <td colspan="2" class="tl">Sprinklr</td>
+      <td>Senior Product Analyst</td>
+      <td colspan="2">NLP | Sentiment Analysis | Gen-AI | Enterprise SaaS</td>
+      <td>04/2022 &ndash; 07/2024</td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Client<br>Impact</td>
+      <td class="dsc" colspan="4"><ul>
+        <li><b>Built</b> personalized iOS app <b>Sharek</b> for the <b>Qatari government</b>, enabling the Prime Minister's office to monitor citizen complaints across <b>40 ministries</b> via <b>NLP sentiment analysis</b>, delivering insights in <b>4 weeks</b></li>
+        <li><b>Built</b> a Gen-AI Assistant for <b>Walmart Spark Driver Support</b>, analyzing <b>100K+ contact center calls</b> using <b>unsupervised ML clustering</b> and correlation detection to identify root causes &amp; auto-route mitigation actions</li>
+      </ul></td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Product<br>Growth</td>
+      <td class="dsc" colspan="4"><ul>
+        <li><b>Improved</b> Use Case Hub adoption from <b>35% to 85%</b> by conducting usability &amp; A/B tests, integrating solution into main dashboard, <b>eliminating 7-day manual config</b> &amp; enabling self-service for &lt;$1M ARR+ SME clients</li>
+        <li><b>Designed</b> a 2-step user journey for <b>AI-Reporting automation</b>, delivering complete dashboards in <b>&lt;10 seconds</b> with 30-day historical data, auto-alerts &amp; scheduled exports, driving <b>15% revenue increase</b> in first 3 months</li>
+      </ul></td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Innovation</td>
+      <td class="dsc" colspan="4"><ul>
+        <li><b>Designed</b> Arabic localization enforcing <b>RTL UI adaptation</b> and smart alerts for negative sentiment tracking, crisis &amp; exec monitoring, improving <b>7-day retention from 40% to 55%</b> and reducing <b>time-to-insight from 2 days to 2 hours</b></li>
+      </ul></td>
+    </tr>
+
+    <!-- SUKHA EDUCATION -->
+    <tr class="sub">
+      <td colspan="2" class="tl">Sukha Education</td>
+      <td>Strategy Consultant (Voluntary)</td>
+      <td colspan="2">Digital Transformation | NGO | Process Optimization</td>
+      <td>01/2025 &ndash; 04/2025</td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Impact</td>
+      <td class="dsc" colspan="4"><ul>
+        <li><b>Designed</b> a digital transformation strategy for an NGO serving underprivileged students in Chennai, resulting in <b>&#8377;60K annual cost savings</b> through automation and process optimization across <b>50+ volunteers</b> in 12-week phased rollout</li>
+      </ul></td>
+    </tr>
+
+    <!-- ===== ACADEMICS & SCHOLASTIC ACHIEVEMENTS ===== -->
+    <tr class="sh"><td colspan="6" class="al">Academics &amp; Scholastic Achievements</td></tr>
+
+    <tr>
+      <td class="lbl" colspan="2">B.Tech</td>
+      <td class="ac">Indian Institute of Technology Delhi</td>
+      <td class="ac">Civil Engineering</td>
+      <td class="ac"></td>
+      <td class="yr">2021</td>
+    </tr>
+    <tr>
+      <td class="lbl" colspan="2">Class XII</td>
+      <td class="ac">S.S.M Sr. Secondary School, MP</td>
+      <td class="ac"><b>94.2%</b></td>
+      <td class="ac"><b>Rank 1</b> in Chhatarpur District</td>
+      <td class="yr">2017</td>
+    </tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Competitive<br>Exams</td>
+      <td class="dsc" colspan="3"><ul>
+        <li>GATE 2022: Secured <b>Top 1.5%</b> with <b>AIR 1463</b> competing with <b>100K+</b> students</li>
+        <li>JEE Advanced 2017: Secured <b>Top 0.002%</b> with <b>AIR 2446</b> against <b>12 lakh+</b> candidates</li>
+        <li>Scored <b>100/100</b> in Maths &amp; Chemistry in Class 12th | Awarded scholarship worth 5K</li>
+        <li>Secured <b>Rank 1</b> in School at <b>10/10 CGPA</b> in 10th Board Exams &amp; awarded by Education Minister</li>
+      </ul></td>
+      <td class="yr">2022<br>2017<br>2017<br>2015</td>
+    </tr>
+
+    <!-- ===== CORE COMPETENCIES & SKILLS ===== -->
+    <tr class="sh"><td colspan="6" class="al">Core Competencies &amp; Skills</td></tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Technical</td>
+      <td class="dsc" colspan="4" style="font-size:7pt">SQL, BigQuery, Python, Figma, Tableau, Mixpanel, JIRA, APIs, A/B Testing, System Design, AI/ML, SAFe Agile</td>
+    </tr>
+    <tr>
+      <td class="lbl" colspan="2">Product &amp;<br>Strategy</td>
+      <td class="dsc" colspan="4" style="font-size:7pt">PRDs, Roadmapping, GTM Strategy, Product Strategy, Market Research, Competitive Analysis, UX Research, Feature Prioritization, OKR &amp; KPI Definition, Business Case &amp; Financial Modeling, Stakeholder Management, Cross-Functional Collaboration, PLM</td>
+    </tr>
+
+    <!-- ===== ADDITIONAL ACHIEVEMENTS ===== -->
+    <tr class="sh"><td colspan="6" class="al">Additional Scholastic Achievements</td></tr>
+
+    <tr>
+      <td class="lbl" colspan="2">Awards</td>
+      <td class="dsc" colspan="3"><ul>
+        <li>Secured <b>Rank 3</b> qualifying for National in 9th State level <b>UCMAS Abacus Mental Math</b> competition</li>
+        <li>Selected <b>Top 2</b> students out of 125 from CBSE Board in M.P. <b>Vigyan Manthan Yatra</b> Science Trip</li>
+      </ul></td>
+      <td class="yr">2012<br><br>2013</td>
+    </tr>
+
+    <!-- ===== INTERESTS ===== -->
+    <tr class="hob">
+      <td class="lbl" colspan="2">Interests</td>
+      <td colspan="4" class="hi">
+        AI-Music Creation &amp; Singing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Co-creating with AI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Building AI Systems&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Product Strategy
+      </td>
+    </tr>
+
+  </table>
+
+  <div class="footer">
+    <span>Contact: +91-7678296693</span>
+    <span>E-mail: satvik.jain@iitdalumni.com</span>
+    <span>LinkedIn: Satvik Jain</span>
+  </div>
+
+</div>
+</body>
+</html>
