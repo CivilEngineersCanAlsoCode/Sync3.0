@@ -1,0 +1,247 @@
+%-------------------------
+% Satvik Jain — PM Resume (Brandable)
+% Template: MIT License
+% BRANDING GUIDE:
+%   To apply company colors, replace the 3 color placeholders below:
+%   BRAND_PRIMARY  = Main accent color (section rules, name, links)
+%   BRAND_SECONDARY = Metadata / date color
+%   BRAND_ACCENT   = Bullet highlights, skill tags (optional)
+%
+%   HOW TO USE:
+%   1. Find target company's brand hex codes (website / brand guidelines)
+%   2. Replace the hex values in \definecolor lines marked with %%<BRAND>
+%   3. Optionally update \faMapMarker location to match role city
+%   4. Recompile with: pdflatex Satvik_Jain_Resume.tex
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+
+% fontawesome
+\usepackage{fontawesome5}
+
+% fixed width
+\usepackage[scale=0.90,lf]{FiraMono}
+
+%=========================================================
+% %%<BRAND> COMPANY BRANDING COLOR ZONE — EDIT THESE 3
+%=========================================================
+% Default = neutral grey (looks good everywhere)
+% Replace hex values below to match target company brand
+
+\definecolor{brand-primary}{HTML}{1A1A2E}   %%<BRAND_PRIMARY>   e.g. Figma #1A1A2E | CRED #1C1C1E | Canva #00C4CC
+\definecolor{brand-secondary}{HTML}{4A4A6A} %%<BRAND_SECONDARY> e.g. softer shade of primary
+\definecolor{brand-accent}{HTML}{7B2D8B}    %%<BRAND_ACCENT>    e.g. Figma #A259FF | Suno #8B5CF6 | ElevenLabs #F97316
+
+%=========================================================
+% STANDARD STRUCTURAL COLORS (do not change)
+%=========================================================
+\definecolor{light-grey}{gray}{0.83}
+\definecolor{dark-grey}{gray}{0.3}
+\definecolor{text-grey}{gray}{.08}
+
+\DeclareRobustCommand{\ebseries}{\fontseries{eb}\selectfont}
+\DeclareTextFontCommand{\texteb}{\ebseries}
+
+% underline
+\usepackage{contour}
+\usepackage[normalem]{ulem}
+\renewcommand{\ULdepth}{1.8pt}
+\contourlength{0.8pt}
+\newcommand{\myuline}[1]{%
+  \uline{\phantom{#1}}%
+  \llap{\contour{white}{#1}}%
+}
+
+% sans serif font
+\usepackage{tgheros}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage[T1]{fontenc}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{0in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Section formatting — rule color uses brand-primary
+\titleformat{\section}{
+    \color{brand-primary}\bfseries \vspace{2pt} \raggedright \large  %%<BRAND_PRIMARY>
+}{}{0em}{}[\color{brand-primary}{\titlerule[2pt]} \vspace{-4pt}]    %%<BRAND_PRIMARY>
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{{#1 \vspace{-1pt}}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{\color{brand-primary}#1} & {\color{brand-secondary}\small #2}\vspace{1pt}\\  %%<BRAND_PRIMARY> %%<BRAND_SECONDARY>
+      \textit{#3} & {\color{brand-secondary} \small #4}\\                                    %%<BRAND_SECONDARY>
+    \end{tabular*}\vspace{-4pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \textbf{\color{brand-primary}#1} & {\color{brand-secondary}\small #2} \\              %%<BRAND_PRIMARY> %%<BRAND_SECONDARY>
+    \end{tabular*}\vspace{-4pt}
+}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{0pt}}
+
+\color{text-grey}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    {\color{brand-primary}\textbf{\Huge Satvik Jain}} \\ \vspace{5pt}   %%<BRAND_PRIMARY>
+    \small
+    \faPhone* \texttt{+91 7678296693} \hspace{1pt} $|$
+    \hspace{1pt} \faEnvelope \hspace{2pt} \href{mailto:satvik.jain@iitdalumni.com}{\texttt{satvik.jain@iitdalumni.com}} \hspace{1pt} $|$
+    \hspace{1pt} \faLinkedin \hspace{2pt} \href{https://linkedin.com/in/satvikjain}{\texttt{linkedin.com/in/satvikjain}} \hspace{1pt} $|$
+    \hspace{1pt} \faMapMarker* \hspace{2pt}\texttt{India / Open to Relocation}
+    \\ \vspace{-3pt}
+\end{center}
+
+%-----------EXPERIENCE-----------
+\section{EXPERIENCE}
+\resumeSubHeadingListStart
+
+  \resumeSubheading
+    {American Express}{Jul 2024 -- Present}
+    {Senior Associate Product Manager}{India / Remote}
+    \resumeItemListStart
+      \resumeItem{Modernized the \textbf{AML Risk scoring engine} powering real-time fraud alerts for \textbf{30M+ daily transactions} across 40+ markets; won Leadership Award \& 6000 Blue rewards by delivering an 18-member scrum team's \textbf{3-year roadmap in 6 months}}
+      \resumeItem{Drove \textbf{20+ UX research sessions} with compliance analysts and managers, translating insights into user journeys for 3 innovative new capabilities: \textit{Asset Manager}, \textit{Advanced Rule Configurations}, and \textit{Sandbox Versioning} — improving usability by \textbf{50\%}}
+      \resumeItem{Championed \textbf{AI-driven Backlog Grooming \& MVP solutioning} with a 6-member team, ranking \textbf{\#33 out of 400+ global teams} in Amex Growth Hack 2025 — later evolved into an Agentic-Agile development framework for rapid prototyping}
+    \resumeItemListEnd
+
+  \resumeSubheading
+    {Sprinklr}{Apr 2022 -- Jul 2024}
+    {Senior Product Analyst}{India / Remote}
+    \resumeItemListStart
+      \resumeItem{Built a \textbf{personalized iOS app (Sharek)} for the Qatari government's Prime Minister's Office, enabling civil complaint monitoring across 40 ministries via \textbf{NLP sentiment analysis} — delivered in \textbf{4 weeks}}
+      \resumeItem{Designed \textbf{Arabic localization} with right-to-left UI adaptation and smart alerts for crisis \& exec monitoring; improved \textbf{7-day retention from 40\% to 55\%} and reduced time-to-insight from 2 days to \textbf{2 hours}}
+      \resumeItem{Designed a \textbf{2-step user journey for an AI Reporting Automation product} delivering complete dashboards in \textbf{$<$10 seconds} with 30-day historical data, auto-alerts, and scheduled exports — drove \textbf{15\% revenue increase} in first 3 months as PM}
+      \resumeItem{Improved \textbf{Use Case Hub adoption from 35\% to 85\%} via usability testing and A/B experiments; eliminated 7-day manual configuration and enabled self-service for \textbf{$<$\$1M ARR+ SME clients}}
+      \resumeItem{Built a \textbf{Gen-AI Assistant for Walmart Spark Driver Support} analyzing \textbf{100K+ contact center calls} using unsupervised ML clustering and correlation detection to auto-route mitigation actions to engineering and fraud teams}
+    \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------VOLUNTEER / FREELANCE-----------
+\section{VOLUNTARY WORK \& FREELANCING}
+\resumeSubHeadingListStart
+
+  \resumeSubheading
+    {Sukha Education}{Jan 2025 -- Apr 2025}
+    {Strategy Consulting (Pro Bono)}{Remote}
+    \resumeItemListStart
+      \resumeItem{Designed a \textbf{digital transformation strategy} for an NGO serving underprivileged students in Chennai — achieved \textbf{₹60K annual cost savings} through automation and process optimization across 50+ volunteers in a 12-week phased rollout}
+    \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------EDUCATION-----------
+\section{EDUCATION}
+\resumeSubHeadingListStart
+
+  \resumeSubheading
+    {Indian Institute of Technology Delhi (IIT Delhi)}{2017 -- 2021}
+    {Bachelor of Technology, Civil Engineering}{New Delhi, India}
+    \resumeItemListStart
+      \resumeItem{\textbf{Achievements:} JEE Advanced AIR 2446 (Top 0.002\% of 12 lakh+ candidates); GATE 2022 AIR 1463 (Top 1.5\%)}
+    \resumeItemListEnd
+
+  \resumeSubheading
+    {S.S.M Senior Secondary School}{2016 -- 2017}
+    {Class XII, MPBSE}{Madhya Pradesh, India}
+    \resumeItemListStart
+      \resumeItem{Secured \textbf{Rank 1} in Chhatarpur District with \textbf{94.2\%}; scored \textbf{100/100} in Maths \& Chemistry; awarded scholarship}
+    \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------SCHOLASTIC ACHIEVEMENTS-----------
+\section{SCHOLASTIC ACHIEVEMENTS}
+\resumeSubHeadingListStart
+  \resumeProjectHeading{\textbf{Competitive Examinations \& Awards}}{}
+  \resumeItemListStart
+    \resumeItem{AIR 1463 in GATE 2022 — Top 1.5\% competing with 100K+ students}
+    \resumeItem{AIR 2446 in JEE Advanced 2017 — Top 0.002\% of 12 lakh+ candidates}
+    \resumeItem{Rank 1 in Chhatarpur District, Class 12 MPBSE 2017 (94.2\%); scored 100/100 in Maths \& Chemistry}
+    \resumeItem{Rank 1 in School at 10/10 CGPA in Class 10 Board Exams — awarded by Education Minister}
+    \resumeItem{Rank 3 nationally in UCMAS Abacus Mental Math Competition (State Level, 9th grade)}
+    \resumeItem{Selected as 1 of 2 students from CBSE MP to attend M.P. Vigyan Manthan Yatra Science Trip}
+  \resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%-----------PROJECTS & AI INTERESTS-----------
+\section{PROJECTS \& INTERESTS}
+\resumeSubHeadingListStart
+
+  \resumeProjectHeading{\textbf{Resume Improver AI}}{2025}
+  \resumeItemListStart
+    \resumeItem{Built an AI system to analyze, score, and rewrite PM resumes tailored per company — using LLMs and brand-aware formatting}
+  \resumeItemListEnd
+
+  \resumeProjectHeading{\textbf{AI Music Creation \& Co-creation}}{Ongoing}
+  \resumeItemListStart
+    \resumeItem{Active user and co-creator with AI music tools (Suno, ElevenLabs); explores intersection of AI and creative expression through singing and music production}
+  \resumeItemListEnd
+
+  \resumeProjectHeading{\textbf{Product Strategy AI}}{Ongoing}
+  \resumeItemListStart
+    \resumeItem{Building AI-assisted product strategy frameworks for B2C app lifecycle management and agentic development workflows}
+  \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------SKILLS-----------
+\section{SKILLS}
+\begin{itemize}[leftmargin=0in, label={}]
+\small{\item{
+  \textbf{\color{brand-accent}Product:} PRDs, Roadmapping, GTM Strategy, OKR/KPI Definition, Feature Prioritization, Business Case \& Financial Modeling, PLM \\  %%<BRAND_ACCENT>
+  \textbf{\color{brand-accent}Research \& Design:} UX Research, A/B Testing, Usability Testing, UI/UX, Figma, User Journeys, Market Research, Competitive Analysis \\ %%<BRAND_ACCENT>
+  \textbf{\color{brand-accent}Engineering \& Data:} SQL, BigQuery, Tableau, Mixpanel, Python, APIs, System Design, AI/ML, Agentic AI \\ %%<BRAND_ACCENT>
+  \textbf{\color{brand-accent}Process \& Leadership:} SAFe, Agile, JIRA, Stakeholder Management, Cross-Functional Collaboration, Scrum %%<BRAND_ACCENT>
+}}
+\end{itemize}
+
+%-------------------------------------------
+\end{document}
