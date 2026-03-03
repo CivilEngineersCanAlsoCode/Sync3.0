@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "97b1470e6791ee97",
+        "id": "6e44ad8092c1939d",
         "type": "tabs",
         "children": [
           {
-            "id": "e99ed4da47a7b284",
+            "id": "46869c2b4cfb475a",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Template/Question list - 15 category.md",
+                "file": "Use case hub/Template Answers Use Case Hub/1. Problem Definition (Clarity Test).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Question list - 15 category"
+              "title": "1. Problem Definition (Clarity Test)"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 594.5
   },
   "right": {
     "id": "3e1510045eaee68d",
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Template/Question list - 15 category.md",
+                "file": "Use case hub/Template Answers Use Case Hub/1. Problem Definition (Clarity Test).md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Question list - 15 category"
+              "title": "Backlinks for 1. Problem Definition (Clarity Test)"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Template/Question list - 15 category.md",
+                "file": "Use case hub/Template Answers Use Case Hub/1. Problem Definition (Clarity Test).md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Question list - 15 category"
+              "title": "Outgoing links from 1. Problem Definition (Clarity Test)"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Template/Question list - 15 category.md",
+                "file": "Use case hub/Template Answers Use Case Hub/1. Problem Definition (Clarity Test).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Question list - 15 category"
+              "title": "Outline of 1. Problem Definition (Clarity Test)"
             }
           }
         ]
@@ -183,18 +183,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "e99ed4da47a7b284",
+  "active": "88b13834ae220fe4",
   "lastOpenFiles": [
+    "Template/Template for Question for each Product.md",
+    "Template/Question list - 15 category.md",
     "Template/Prompt for answer to each Qs in each part of this this 15Q Template.md",
     "Template/Prompt for answer to all 15 Qs of template in one go.md",
-    "CGB/CGB Resume Brain.md",
-    "CGB/Template Answers CGB/Template Answers CGB.md",
+    "Template/List of 15 Question Categories.md",
+    "Main/Resume Sprinklr Brain dump.md",
     "CGB/Template Answers CGB/Answer to all 15 in detail CGB.md",
+    "Untitled",
+    "CGB/Template Answers CGB/Template Answers CGB.md",
     "CGB/Template Answers CGB/Answer to all 15 Combined CGB.md",
+    "CGB/Template Answers CGB/02. Customer & Persona Depth.md",
+    "CGB/Template Answers CGB/01. Problem Definition (Clarity Test).md",
+    "CGB/CGB Resume Brain.md",
     "CGB/Template Answers CGB/06. AI ML Depth (When Relevant).md",
     "CGB/Template Answers CGB/04. Solution Architecture & Trade-offs.md",
-    "CGB/Template Answers CGB/03. Discovery & Validation.md",
-    "CGB/Template Answers CGB/02. Customer & Persona Depth.md",
-    "CGB/Template Answers CGB/01. Problem Definition (Clarity Test).md"
+    "CGB/Template Answers CGB/03. Discovery & Validation.md"
   ]
 }
