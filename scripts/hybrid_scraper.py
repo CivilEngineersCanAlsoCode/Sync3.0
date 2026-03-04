@@ -7,9 +7,8 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 
 # Configuration
-USER_DATA_DIR = os.path.expanduser("~/Library/Application Support/Google/Chrome/Default")
-if not os.path.exists(USER_DATA_DIR):
-    USER_DATA_DIR = "./user_data"
+USER_DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "scraper_profile")
+os.makedirs(USER_DATA_DIR, exist_ok=True)
 
 DATA_DIR = "/Users/satvikjain/Downloads/PM/data"
 BEHAVIOR_FILE = os.path.join(DATA_DIR, "behavior.json")
