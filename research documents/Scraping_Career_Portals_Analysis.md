@@ -49,6 +49,41 @@ If the primary goal is **absolute safety from bans**:
 **Future Architecture Recommendation:**
 Rather than fighting custom career portals, the most robust approach is to either:
 
+---
+
 1.  **Use a job-board aggregator API** (like scraping Wellfound/Cutshort).
 2.  **Use Search Engine APIs** (Google Custom Search targeting `site:careers.microsoft.com`).
 3.  **Run with full headful browsers natively** using stealth plugins if direct portal scraping is an absolute requirement.
+
+---
+
+## 6. The Winner: The Hybrid "Human-Augmented" Scraper
+
+### Why this approach?
+
+We chose this because modern anti-bot systems (Akamai, Cloudflare, AWS WAF) are designed to detect _patterns_ and _fingerprints_ of headless automation. By using a **Headful Playwright Scraper with Persistent Context**, we leverage your real, authenticated browser session. The bot handles the repetitive data capture, while you handle the infrequent security hurdles (CAPTCHAs, logins).
+
+### The User Journey
+
+1.  **Launch:** You run the script; it opens your actual Chrome profile in a visible window.
+2.  **Hand-off:** You navigate to the target site and perform the initial search/login.
+3.  **Activation:** Once on the results page, you signal the script to start.
+4.  **Assisted Navigation:** The script scrolls or clicks "Next," while silently "sniffing" the background JSON traffic.
+5.  **Data Persistence:** Every raw JSON payload is saved instantly to a local directory, bypassing the need for fragile DOM selectors.
+
+### Generalization: How to adapt for ANY Career Portal
+
+To target a new company (e.g., Apple, Netflix, NVIDIA):
+
+1.  **Identify the API:** Open DevTools > Network tab. Filter by `Fetch/XHR`. Refresh the jobs page and look for the response containing the job list.
+2.  **Update Keywords:** In the `handle_response` function, add the company's specific API URL fragments (e.g., `api/v1/jobs`) to the filter list.
+3.  **Selector Mapping:** If the site uses infinite scroll, the generic `scroll` command works. If it uses a button, update the `page.click()` target to the "Next" button's CSS selector.
+4.  **Profile Path:** Ensure the `USER_DATA_DIR` points to your primary browser's data folder to inherit your existing trust score.
+
+### Strict Best Practices
+
+1.  **NEVER go Headless:** The moment `headless=True` is detected, your IP trust score drops. Stay headful.
+2.  **Use Persistent Context:** Always launch with your real user profile. Cookies are your shield.
+3.  **Rate Limit by Heartbeat:** Don't click "Next" as fast as possible. Use `asyncio.sleep()` with random jitter (3-7 seconds) to mimic human reading time.
+4.  **Sniff, Don't Scrape:** Prioritize `page.on('response')` over `page.query_selector()`. API data is structured and doesn't break when they redesign the website.
+5.  **The "Beep" Alert:** Implement a sound notification if the script encounters a 403 or a CAPTCHA so you can intervene immediately.
