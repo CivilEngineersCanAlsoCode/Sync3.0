@@ -19,16 +19,24 @@ def assemble_resume(template_path, data_json, output_path):
 
     # Dictionary should contain keys like "FULL_NAME", "EMAIL", "PROFESSIONAL_SUMMARY", etc.
     # The template placeholders are expected to be in the format {{KEY}}
+    # Replace placeholders with data
     for key, value in data.items():
         placeholder = f"{{{{{key}}}}}"
         html = html.replace(placeholder, str(value))
 
+    # PM-25d: Assembly Safety Gate (Regex check for leftover placeholders post-replacement)
+    import re
+    leftovers = re.findall(r"\{\{.*?\}\}", html)
+    
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
     
+    if leftovers:
+        raise ValueError(f"PlaceholderLeakageError: {len(leftovers)} tags remained.")
+
     print(f"✅ Resume assembled successfully: {output_path}")
 
 if __name__ == "__main__":

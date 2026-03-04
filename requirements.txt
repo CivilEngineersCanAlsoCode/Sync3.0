@@ -1,0 +1,6 @@
+chromadb==0.4.24
+argparse
+beautifulsoup4
+jinja2
+python-dotenv
+ playwright

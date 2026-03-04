@@ -1,6 +1,39 @@
 import argparse
 import os
 import json
+import re
+
+def smart_trim(text, limit=88):
+    """
+    PM-25a: Horizontal Smart Trimmer.
+    Contracts common words or truncates to fit the A4 line budget.
+    """
+    if len(text) <= limit:
+        return text
+    
+    # Pass 1: Semantic Abbreviations
+    abbreviations = {
+        "Management": "Mgmt",
+        "Strategy": "Strat",
+        "Product Manager": "PM",
+        "Artificial Intelligence": "AI",
+        "Machine Learning": "ML",
+        "Development": "Dev",
+        "International": "Intl",
+        "Cross-functional": "Cross-func",
+        "Optimization": "Optim"
+    }
+    
+    for word, abbrev in abbreviations.items():
+        text = re.sub(word, abbrev, text, flags=re.IGNORECASE)
+        if len(text) <= limit:
+            return text
+            
+    # Pass 2: Truncation with Safety
+    if len(text) > limit:
+        return text[:limit-3] + "..."
+    
+    return text
 
 def rank_bullets(bullets, jd_context):
     """
@@ -58,7 +91,8 @@ def draft_content(signals_json, jd_json, output_dir):
         bullets = role.get("bullets", [])
         
         # Release 2 Requirement: Intra-Project Prioritization
-        prioritized_bullets = rank_bullets(bullets, jd_context)
+        # Release 2.5 Requirement: Horizontal Smart Trimmer (PM-25a)
+        prioritized_bullets = [smart_trim(b) for b in rank_bullets(bullets, jd_context)]
         
         role_key = f"{company}_bullets"
         application_content[role_key] = prioritized_bullets
