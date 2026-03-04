@@ -57,11 +57,11 @@ Rather than fighting custom career portals, the most robust approach is to eithe
 
 ---
 
-## 6. The Winner: The Hybrid "Human-Augmented" Scraper
+## 6. The Production Winner: Manual Stealth Mode (Default)
 
 ### Why this approach?
 
-We chose this because modern anti-bot systems (Akamai, Cloudflare, AWS WAF) are designed to detect _patterns_ and _fingerprints_ of headless automation. By using a **Headful Playwright Scraper with Persistent Context**, we leverage your real, authenticated browser session. The bot handles the repetitive data capture, while you handle the infrequent security hurdles (CAPTCHAs, logins).
+We chose this because it is **100% ban-proof.** Modern anti-bot systems (Akamai, Cloudflare, AWS WAF) are designed to detect _patterns_ of headless automation. By using a **Headful Passive Listener**, we leverage your real, human navigation. You drive the browser; the script silently captures the results.
 
 ### The User Journey
 

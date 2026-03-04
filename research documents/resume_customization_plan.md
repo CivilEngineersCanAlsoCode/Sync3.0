@@ -440,27 +440,28 @@ Sync/
 
 ### Step 4.0 — Job Data Acquisition (Dual-Tier Strategy) ⭐ UPDATED
 
-Before processing, the user acquires Job Descriptions via one of two production-ready modes:
+Before processing, the user acquires Job Descriptions via one of two modes. **Passive Stealth Mode is the default recommendation for safety.**
 
-#### **Tier 1: Automated Capture (High-Speed)**
-
-- **Script:** `scripts/microsoft_automation.py`
-- **Target:** Eightfold-powered portals (Microsoft, etc.).
-- **Mechanism:**
-  - Launch headful Playwright with stealth profile.
-  - Automates "Next" pagination and pre-scrolls for lazy-loading.
-  - Intercepts background JSON payloads directly from the DOM/Network.
-- **Outcome:** Rapid extraction of 100+ jobs into structured data.
-
-#### **Tier 2: Universal Manual Capture (Passive/Stealth)**
+#### **Tier 1: Universal Manual Capture (Passive/Stealth) — DEFAULT**
 
 - **Script:** `scripts/manual_capture.py`
-- **Target:** Any site with aggressive bot detection (Amazon, etc.).
+- **Target:** **Any career portal** (Amazon, Google, startups, etc.).
+- **Stability:** **PRODUCTION READY / ALWAYS SAFE.**
 - **Mechanism:**
   - Passive network listener (`page.on('response')`).
-  - Human drives the navigation and clicks (Zero Automation Risk).
+  - Human drives the navigation and clicks (**Zero Automation Risk**).
   - Script logs `[JSON]` traffic and auto-saves relevant job payloads.
-- **Normalization:** `universal_export` handles both single-job objects and search-result lists.
+- **Outcome:** 100% reliable capture of whatever the user views on screen.
+
+#### **Tier 2: Automated Capture (High-Speed) — [BETA]**
+
+- **Script:** `scripts/microsoft_automation.py`
+- **Target:** **Microsoft / Eightfold-powered portals** (expandable later).
+- **Stability:** **EXPERIMENTAL.** Currently only stable for Microsoft.
+- **Mechanism:**
+  - Launch headful Playwright with stealth profile.
+  - Automated pagination and pre-scrolling triggers to bypass lazy-loading.
+- **Outcome:** Rapid extraction of 100+ jobs, but carries a higher risk of site-structure breakage or detection than Manual Mode.
 
 #### **Step 4.0a — Unified CSV Export**
 
