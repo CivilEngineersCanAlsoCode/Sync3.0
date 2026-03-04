@@ -93,3 +93,15 @@ The Epic 4 data acquisition plan pivoted heavily to a manual "Passive Capture" m
 The architecture requires a strict `≥ 90%` Confidence Gate _before_ generating the HTML.
 
 - **Improvement:** In execution, the engine eagerly skipped straight to generating the HTML drafts and compiling the templates before explicitly resolving the gap queues with the user. The pipeline must insert hard programmatic breakpoints that require human validation input before allowing the generation chain to proceed.
+
+## 10. Intra-Project Bullet Prioritization
+
+Currently, bullets within a specific project context are drafted and inserted without a forced "Power Ranking." This results in high-impact signals potentially being buried at the bottom of a role's section, reducing the immediate "WOW" factor for recruiters.
+
+### Improvement Steps (Release 2 Strategy)
+
+- **Semantic Impact Ranking (⭐ BEST APPROACH):** During the Phase 6.2 drafting stage, the LLM must perform a secondary ranking pass on the selected signals for _each_ role. It must sort them by a composite score of: (Impact Magnitude) × (JD Alignment).
+  - _Reason:_ Ensures the recruiter's eye hits the most relevant achievement first. A "Spearheaded GenAI" bullet should never sit below a "Managed JIRA board" bullet.
+- **Alternative Approaches considered:**
+  1. _Chronological Sorting:_ (Rejected: Less effective for customized resumes).
+  2. _Keyword Density Sorting:_ (Rejected: High keyword count doesn't always equal high impact).
