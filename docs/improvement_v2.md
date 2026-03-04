@@ -8,50 +8,63 @@ This document captures a comprehensive adverse review of the Sync Resume Customi
 
 The current system failed to achieve a perfect "Rectangular Block" fit on a standard A4 page (210mm x 297mm). The approach of aggressively computing bullet length (`BULLET_CHAR_LIMIT`) or blindly injecting `font-size: 7pt` CSS strings proved extremely brittle. The difference between a browser's infinity-scroll height and a rigorous PDF Print Preview boundary was fundamentally misunderstood by the system engine.
 
-### Improvement Steps
+### Improvement Steps (Release 2 Strategy)
 
-- **Embrace the Container Query:** The HTML resume MUST be constrained to a hard 8.5in or 210mm width natively in CSS, not by manually adjusting character limits across the board.
-- **Character Budgeting:** Instead of a global ~85 character limit, the system needs column-specific math. If the description cell takes up 75% of the page width, the character budget must be explicitly defined (e.g., 82-88 characters for Calibri 10pt) for _that specific cell_.
-- **The "5% Stretch Strategy":** We must use `text-align-last: justify; white-space: nowrap;` so that once a bullet hits 95% of its character length budget, the browser mathematically stretches the remaining air. We failed to leverage this CSS property in the automation loop.
-- **Failures in Automated Validation:** The `puppeteer` script responsible for measuring A4 overflow catastrophically failed due to dependency and timeout issues, forcing a complete fallback to manual CSS adjustments. Future validation endpoints need decoupled execution environments independent of local Chromium instability.
+- **The "5% Stretch Strategy" (⭐ BEST APPROACH):** Abandon rigid character limits. Target bullets to hit ~95% of the line and use `text-align-last: justify` with `white-space: nowrap` to mathematically stretch the last word to the margin. Use `&nbsp;` around metrics for visual micro-padding.
+  - _Reason:_ Most physically robust way to guarantee the "Rectangular Block" across different rendering engines without the fragility of character counting.
+- **Alternative Approaches considered:**
+  1. _Fluid Typography:_ Using CSS `clamp()` to scale font size dynamically. (Rejected: Too inconsistent across OS).
+  2. _Refined Char Budgets:_ Stricter V1-style counting. (Rejected: Brittle and fails on proportional fonts).
+- **Embrace the Container Query:** The HTML resume MUST be constrained to a hard 8.5in or 210mm width natively in CSS, ensuring the 5% stretch logic is relative to the A4 boundary.
+- **Failures in Automated Validation:** Pivot away from external `puppeteer` dependencies to internal **HTML-native validation hooks** that check for overflow during the generation loop.
 
 ## 2. Context Loss in Vector DB Chunking (ChromaDB)
 
 The resume generation pipeline currently hallucinates or loses project context because the initial signal ingestion is flawed. When chunking text for the vector database, the context of _which_ project the signal belongs to (e.g., Walmart Spark, Qatari PM, Amex Risk) was disconnected from the granular trait (e.g., "Product Vision" or "Cross-functional Leadership").
 
-### Improvement Steps
+### Improvement Steps (Release 2 Strategy)
 
-- **Hierarchical Metadata Tagging:** Every chunk embedded into ChromaDB MUST contain explicitly hardcoded metadata tags of its parent context. Example: `{"company": "Sprinklr", "project": "Sharek (Qatari PM)", "category": "Computer Vision"}`.
-- **Retrieval-Augmented Windowing:** When the LLM runs a query like "Find examples of Product Strategy", the retrieval engine must pull the _surrounding_ contextual chunks to ensure the drafted bullet seamlessly, and correctly, references the true underlying project, eliminating context cross-contamination.
+- **Hierarchical Self-Contained Chunks (⭐ BEST APPROACH):** Ingest every signal as a Q&A pair that explicitly includes the context in the text: _"What did you do at Amex for AML Scoring? I [Action]..."_.
+  - _Reason:_ Eliminates dependencies on fragile metadata retrieval and ensures the LLM always knows the "Home Project" of a bullet.
+- **Alternative Approaches considered:**
+  1. _Metadata Filtering:_ Relying on ChromaDB metadata tags. (Rejected: LLMs often ignore metadata).
+  2. _Context Windowing:_ Pulling adjacent chunks during retrieval. (Rejected: High token cost and noise).
+- **Hierarchical Metadata Tagging:** Every chunk embedded into ChromaDB MUST contain explicitly hardcoded metadata tags of its parent context for secondary filtering.
 
 ## 3. Persistent Memory vs. Docker Overhead
 
 In an attempt to spin up ChromaDB, the system incorrectly defaulted to spinning up Docker containers and volumes rather than utilizing localized, persistent storage. This introduced unnecessary dependencies, network overhead, and complexity for a local terminal application.
 
-### Improvement Steps
+### Improvement Steps (Release 2 Strategy)
 
-- **Strictly Local Persistent Storage:** The ChromaDB client must be initialized explicitly pointing to a local directory (e.g., `chromadb.PersistentClient(path="/Users/.../.chroma_db")`) mapped inside the Sync project folder. Docker containers must not be used for local, single-user script execution.
+- **Strictly Local Persistent Storage (⭐ BEST APPROACH):** Initialize the ChromaDB client with `chromadb.PersistentClient(path="./.chroma_db")`.
+  - _Reason:_ Drastic reduction in complexity. Zero Docker overhead, zero network latency, and zero "container not started" failures.
+- **Alternative Approaches considered:**
+  1. _S3/Cloud Store:_ (Rejected: Overkill for local CLI).
+  2. _Docker Volume persistence:_ (Rejected: Brittle and hard to manage across user environments).
 
 ## 4. Logical Bullet Point Distribution
 
 The current automation blindly enforces a flat number of bullet points per role, which violates standard resume reading psychology and unnecessarily bloats page height. The primary/current role was treated with the same depth as a voluntary role from earlier in the career.
 
-### Improvement Steps
+### Improvement Steps (Release 2 Strategy)
 
-- **Temporal Weighting Algorithm:** The engine must be programmed with an optimal upper limit (e.g., 9-10 bullets max to consistently fit the A4 page height) distributed across an exponential decay curve.
-  - **Current Role (American Express):** 4 to 5 highly detailed bullets.
-  - **Previous Role (Sprinklr):** 3 bullets.
-  - **Older/Voluntary Roles (Sukha):** 1-2 bullets max.
-- **Granular Priority:** Only the hard JD keywords with $>90\%$ match relevance should be allocated to the most recent role's bullet allocation. Older roles should fill auxiliary (Soft) keywords.
+- **Match-Score Semantic LLM Audit (⭐ BEST APPROACH):** Replace substring matching with a secondary Claude pass to evaluate "Signal-to-JD" quality.
+  - _Reason:_ Correctly handles synonyms (e.g., "GenAI" vs "LLMs") and rewards depth of experience rather than just keyword presence.
+- **Temporal Weighting Algorithm:** Program the engine with an optimal upper limit (9-10 bullets total) distributed via exponential decay (Recent = 5, Previous = 3, Older = 1-2).
+- **Alternative Approaches considered:**
+  1. _Regex Matcher:_ (Rejected: Still too dumb for complex PM skills).
+  2. _Vector Distance Score:_ (Rejected: Lacks nuance for seniority).
 
 ## 5. GitHub Pages Deployment & Branch Isolation Failures
 
 The system attempted to push the active working directory directly to GitHub to host the resumes via GitHub Pages. The URLs generated did not resolve correctly, resulting in broken live links.
 
-### Improvement Steps
+### Improvement Steps (Release 2 Strategy)
 
-- **Branch Isolation:** The compiled HTML resumes and recruiter artifacts must be strictly isolated into a clean, dedicated branch (e.g., `gh-pages` or a deployment folder configuration) entirely separate from the `main` source code.
-- **GitHub Actions / Static HTML:** Use automated GitHub Actions to build and deploy the static HTML from this isolated branch to GitHub Pages, ensuring the routing properly resolves to the expected URLs without conflating repository structure with site architecture.
+- **Branch Isolation & Action Automation (⭐ BEST APPROACH):** compiled HTML resumes must be strictly isolated into a `gh-pages` branch.
+  - _Reason:_ Prevents clutter in `main` and ensures that the GitHub Pages site architecture remains clean and decoupled from the source code.
+- **GitHub Actions Integration:** Use a dedicated YAML workflow to push only the `Sync/` directory to the `gh-pages` branch on every commit to `main`.
 
 ## 6. "Dumb" String Matching for Match Scores
 
@@ -63,7 +76,11 @@ The plan explicitly touted an "AI-powered signal engineering" platform, but the 
 
 The core directive insists on using the `bd` (Beads) CLI for all state synchronization.
 
-- **Improvement:** Automation loops must securely map and fetch valid `bd` issue IDs before attempting status updates. Blindly sending commands like `bd close 37` or using deprecated commands like `bd context` broke the execution flow.
+### Improvement Steps (Release 2 Strategy)
+
+- **Strict `bd` Mapping (⭐ BEST APPROACH):** Automation loops must fetch valid `bd` issue IDs from the current context before attempting updates.
+  - _Reason:_ Prevents "Agentic Amnesia" and keeps the local state synchronized with the remote git-backed memory.
+- **Sync at Session End:** Mandatory `bd sync` after every batch run to flush the debounce buffer to Git.
 
 ## 8. The "Dual-Tier" Scraper Pivot
 

@@ -209,16 +209,25 @@ Copy `Templates/CV Format.html` to `Templates/Base_Template.html`.
 Replace all content with placeholder HTML comments as defined in Phase 2.1 of `resume_customization_plan.md`.
 Ensure the CSS guardrails are locked (`.c5 ≥ 14.5%`, `white-space: nowrap`, `--color-border: #000`).
 
-## Step 8 — GitHub Setup
+## Step 8 — GitHub & Automation Setup
 
 Ask the user:
 
-1. "Please paste your GitHub Personal Access Token (needs `repo` scope)."
+1. "Please paste your GitHub Personal Access Token (needs `repo`, `workflow`, and `write:packages` scopes)."
 2. "Please paste the GitHub repository URL where your resumes will be stored."
 
 Save these to `.env` (never commit this file).
 Clone or connect to the repo, then create the `Sync/` folder scaffold.
 Enable GitHub Pages from Settings → Pages → deploy from `main`.
+
+**GitHub Actions Activation:**
+
+1. Ensure `.github/workflows/` directory exists with the 3 standard workflows:
+   - `resume-generation.yml`
+   - `deploy-portfolio.yml`
+   - `job-scraper-cron.yml`
+2. Configure Repository Secrets if using external services (though not required for basic Sync).
+3. Set Workflow Permissions: `Settings > Actions > General > Workflow permissions > Read and write permissions`.
 
 ## Step 9 — Ready State Confirmation (First Run Complete)
 
