@@ -18,6 +18,20 @@ DATA_DIR = "/Users/satvikjain/Downloads/PM/data"
 KB_FILE = "/Users/satvikjain/Downloads/PM/research documents/Scraping_Career_Portals_Analysis.md"
 os.makedirs(DATA_DIR, exist_ok=True)
 
+def log_learning(company, error, solution):
+    """Appends a new learning case to the Scraping Analysis Knowledge Base."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = f"\n### [{company}] Learning Case ({timestamp})\n\n"
+    entry += f"- **Error**: {error}\n"
+    entry += f"- **Solution**: {solution}\n"
+    
+    try:
+        with open(KB_FILE, "a") as f:
+            f.write(entry)
+        print(f"  [Knowledge Base] Logged new learning for {company}")
+    except Exception as e:
+        print(f"  [!] Failed to update Knowledge Base: {e}")
+
 async def handle_response(response, company_name):
     """Intercepts JSON responses and saves them if they look like job details."""
     content_type = response.headers.get("content-type", "")
@@ -91,7 +105,9 @@ def universal_export(company_name):
                             'Apply Link': job_data.get('url') or job_data.get('positionUrl') or job_data.get('url_next_step') or content.get('url')
                         }
         except Exception as e:
-            print(f"  [!] Skip {os.path.basename(f)}: {e}")
+            err_msg = str(e)
+            print(f"  [!] Skip {os.path.basename(f)}: {err_msg}")
+            log_learning(company_name, f"JSON Parsing Error in {os.path.basename(f)}", f"Check if schema has changed. Error: {err_msg}")
 
     if unique_jobs:
         fieldnames = ['Job Title', 'Job ID', 'Location', 'Description', 'Apply Link']

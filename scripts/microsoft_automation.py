@@ -23,6 +23,21 @@ OUTPUT_CSV = os.path.join(DATA_DIR, "microsoft_pm_jobs.csv")
 # Selectors from Discovery (Refined for Eightfold/Microsoft)
 NEXT_BUTTON_SELECTOR = ".pagination-module_pagination-button__aTecY.pagination-module_pagination-next__OHCf9, button[aria-label*='Next'], .pagination-next, [data-automation-id='next-button']"
 JOB_CARD_SELECTOR = '.card-F1ebU, .cardContainer-GcY1a, li[id^="job-card-"], .job-card, [role="listitem"]'
+KB_FILE = "/Users/satvikjain/Downloads/PM/research documents/Scraping_Career_Portals_Analysis.md"
+
+def log_learning(company, error, solution):
+    """Appends a new learning case to the Scraping Analysis Knowledge Base."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = f"\n### [{company}] Learning Case ({timestamp})\n\n"
+    entry += f"- **Error**: {error}\n"
+    entry += f"- **Solution**: {solution}\n"
+    
+    try:
+        with open(KB_FILE, "a") as f:
+            f.write(entry)
+        print(f"  [Knowledge Base] Logged new learning for {company}")
+    except Exception as e:
+        print(f"  [!] Failed to update Knowledge Base: {e}")
 
 async def handle_response(response):
     content_type = response.headers.get("content-type", "")
@@ -60,18 +75,23 @@ def export_to_csv():
                 job_data = content.get('data', {}).get('data', {})
                 job_id = job_data.get('displayJobId')
                 if job_id and job_id not in unique_jobs:
-                    jd = job_data.get('jobDescription', '')
+                    jd_raw = job_data.get('jobDescription', '')
+                    # Clean tags to match manual_capture style
+                    jd_clean = jd_raw.replace('<br/>', '\n').replace('<br>', '\n').strip()
                     unique_jobs[job_id] = {
                         'Job Title': job_data.get('name'),
                         'Job ID': job_id,
                         'Location': job_data.get('location'),
-                        'Experience': parse_experience(jd),
+                        'Description': jd_clean,
                         'Apply Link': f"https://apply.careers.microsoft.com{job_data.get('positionUrl', '')}"
                     }
-        except: pass
+        except Exception as e:
+            err_msg = str(e)
+            print(f"  [!] Skip {os.path.basename(f)}: {err_msg}")
+            log_learning("Microsoft", f"JSON Parsing Error in {os.path.basename(f)}", f"Check if Eightfold schema has changed. Error: {err_msg}")
 
     if unique_jobs:
-        fieldnames = ['Job Title', 'Job ID', 'Location', 'Experience', 'Apply Link']
+        fieldnames = ['Job Title', 'Job ID', 'Location', 'Description', 'Apply Link']
         with open(OUTPUT_CSV, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
@@ -125,7 +145,9 @@ async def run_automation():
                     except Exception as e:
                         print(f"  [!] Skip card {i+1}: {e}")
             except Exception as e:
-                print(f"[!] No cards found on this page: {e}")
+                err_msg = str(e)
+                print(f"[!] Critical Automation Error: {err_msg}")
+                log_learning("Microsoft", f"Automation Loop Break: {err_msg}", "Check if JOB_CARD_SELECTOR or pagination button changed.")
                 # Optional: log a snippet of HTML for debugging
                 html = await page.content()
                 with open("/tmp/ms_portal_debug.html", "w") as f: f.write(html)

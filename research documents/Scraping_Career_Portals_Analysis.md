@@ -99,3 +99,11 @@ To target a new company (e.g., Apple, Netflix, NVIDIA):
 - **Solution**: Broadened filters (`v1`, `v2`, `api`) and added a visual `[JSON]` log in the terminal to help the user identify capture-worthy traffic.
 - **Error**: Export failed because Amazon returns a _list_ of jobs in one JSON, while the parser expected a single object.
 - **Solution**: Implemented a **Normalization Layer** in `universal_export` that detects both detail objects and search result lists, making the script truly platform-agnostic.
+
+### [System-Wide] Automated Learning Loop (2026-03-04 07:11:00)
+
+Both the **Manual Stealth Mode** and **Automated Mode [BETA]** now feature an integrated **Learning Loop**.
+
+- **Mechanism**: All catchable exceptions (JSON schema shifts, selector timeouts, network drops) trigger the `log_learning` function.
+- **Persistence**: Errors and inferred solutions are automatically appended to this document to prevent repeating the same mistakes in future sessions.
+- **Unified Schema**: Both engines now export a consistent CSV structure (`Job Title`, `Job ID`, `Location`, `Description`, `Apply Link`) to ensure seamless downstream JD processing.
