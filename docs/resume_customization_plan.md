@@ -31,9 +31,9 @@ Sync is an AI-powered, signal engineering resume customization system. It:
 
 ### Step 0.1 — Dependency Check & System Health
 
-- Check if `bd` CLI is installed. If not, install and `bd init`.
-- Run `bd context` — if Sync epics exist, skip to Step 0.5 (returning user).
-- Check for ChromaDB Docker container (`docker ps | grep chroma`). If absent, pause and instruct user.
+- Check if `bd` CLI is installed (`bd --version`). If not, install `@beads/cli` and `bd init`.
+- Run `bd ready --json` — if Sync epics exist, skip to Step 0.5 (returning user flow).
+- Initialize local ChromaDB persistence (`chromadb.PersistentClient(path="./.chroma_db")`). Zero Docker dependency in Release 2.
 
 ### Step 0.2 — bd Task Graph Initialization (First Run Only)
 
@@ -41,8 +41,8 @@ Create all epics, tasks, and dependencies as listed below in the bd dependency g
 
 ### Step 0.3 — Context Recovery (Returning Users)
 
-- Run `bd ready --json` + `bd context`
-- Print: "Welcome back to Sync. Your next unblocked task is [PM-SYNC-XX]. Continue?"
+- Run `bd ready --json`
+- Print: "Welcome back to Sync. Your next unblocked task is [PM-65x / PM-XXX]. Continue?"
 
 ### Step 0.4 — Obsidian Vault + Existing Resume Connection ⭐ NEW
 
@@ -573,30 +573,14 @@ Proceed to Epic 5 confidence gate? (yes/no)
 
 ### Step 4.4 — ChromaDB Retrieval (PM-SYNC-13)
 
-After confidence gate passes, query ChromaDB → top-8 most relevant signal entries for this JD.
+**Signal Retrieval Strategy (⭐ Release 2 Upgrade):**
 
-**Retrieval Spot-Check (mandatory before Phase 6.2):**
-
-Before any content is drafted, show the retrieved signals to the user:
-
-```
-🔍 Retrieval Spot-Check — Google PM - Search
-
-I will build your resume from these 8 experience signals:
-
-1. [Amex] Spearheaded AML scoring model handling 30M+ daily txns...
-2. [Sprinklr] Led Walmart Gen-AI support assistant (100K+ calls)...
-3. [Sprinklr] Unsupervised ML clustering reduced support tickets 40%...
-4. ...
-
-Do these feel highly relevant to this role? (confirm / replace [N] / re-rank)
-```
-
-- User confirms → proceed to Epic 5
-- User replaces → run a new ChromaDB query with updated keywords, re-show
-- User re-ranks → reorder signals by relevance, proceed
-
-No resume is drafted until signals are confirmed.
+- System must issue **3 separate ChromaDB queries** per JD:
+  1. JD **Hard skill keywords**
+  2. JD **metric types** (e.g., "latency", "conversion")
+  3. JD **seniority/leadership signals**
+- Deduplicate and merge results into a high-precision pool of ~9 signals.
+- Show retrieved signals to user: "I will build your resume from these 9 signals... Confirm?"
 
 ---
 
@@ -692,12 +676,14 @@ Draft full content in `Sync/<Company>/<Role>/content_draft.md`:
 | Rule                | Standard                                                            |
 | ------------------- | ------------------------------------------------------------------- |
 | Bullet format       | Google XYZ: "Accomplished [X] as measured by [Y] by doing [Z]"      |
+| Formatting Strategy | **5% Stretch:** Target 95% line width + `text-align-last: justify`  |
+| Visual Polish       | Use `&nbsp;` around metrics for visual micro-padding                |
+| Intra-Role Sorting  | **Rank bullets by (Impact Magnitude) × (JD Alignment)**             |
 | Character count     | Read from `<!-- BULLET_CHAR_LIMIT: N -->` in Base_Template.html     |
 | Line count          | Exactly 1 line per bullet — zero wrapping                           |
 | Bold keywords       | 2–4 bold terms per bullet                                           |
 | Metric density      | At least 1 number/% per bullet                                      |
 | Fabrication rule    | NEVER invent metrics — verified signal pool only                    |
-| Trailing adjustment | Max 10 `&nbsp;` for micro gaps (<3mm). Rephrase for major gaps.     |
 | Sub-header tags     | Max 20 chars per tag phrase (3 × 20 + 2 pipes fits safely in `.c4`) |
 
 ### Phase 6.3 — Brand Research (with Registry + Fallback)
@@ -725,11 +711,12 @@ Map to CSS variables:
 --color-accent: #HEX; /* CTA / link color */
 ```
 
-### Phase 6.4 — HTML Assembly
+### Phase 6.4 — Python-Based HTML Assembly (PM-1he)
 
-1. `cp Templates/Base_Template.html Sync/<Company>/<Role>/resume.html`
-2. Inject all content from `content_draft.md`
-3. Apply brand color CSS variables
+1. `scripts/assemble.py` reads `Templates/Base_Template.html`
+2. Uses `str.replace()` for all `{{PLACEHOLDERS}}` to avoid `sed` special character hangs.
+3. Injects content and applies brand color CSS variables.
+4. Output to `Sync/<Company>/<Role>/resume.html`.
 
 ### Phase 6.5 — Sub-Header Visual Styling
 
@@ -764,38 +751,18 @@ Format: `Company | Role Title | Tag1 | Tag2 | Tag3 | Date`
 - Trim lowest-value words for bullets over budget
 - Assert zero `<br>` inside any `<li>`
 
-### Phase 6.8 — Compression Pass + Puppeteer Validation
+### Phase 6.8 — Compression Pass + PDF-Height Validation
 
-```bash
-npx puppeteer@latest node -e "
-const puppeteer = require('puppeteer');
-async function validate() {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.setViewport({ width: 794, height: 1123 });
-  await page.goto('file://' + process.argv[2]);
-  const height = await page.evaluate(() => document.body.scrollHeight);
-  const overflows = height > 1123;
-  console.log(overflows ? 'OVERFLOW: ' + height + 'px > 1123px' : 'OK: fits 1 page');
-  await browser.close();
-}
-validate();
-" -- Sync/<Company>/<Role>/resume.html
-```
+- Measure scrollHeight of the generated resume.
+- P0 Goal: Exactly 1 A4 page (zero overflow).
+- If `OVERFLOW` → reduce spacer heights (6px → 4px), reduce `.dsc` line-height (1.35 → 1.28).
+- If content too short → increase spacers or font-size by 0.5pt steps.
+- Avoid external `puppeteer` dependencies where possible; use native browser measurement.
 
-- If `OVERFLOW` → reduce spacer heights (6px → 4px), reduce `.dsc` line-height (1.35 → 1.28), re-run
-- If content too short → increase spacers or font-size by 0.5pt steps
-- Repeat until Puppeteer reports `OK: fits 1 page`
-- Save `validation_report.json` with timestamp and final height to `Sync/<Company>/<Role>/`
+### Phase 6.9 — Match Score (LLM Semantic Audit)
 
-### Phase 6.9 — Match Score Calculation
-
-- +10 pts per JD Hard keyword present in resume
-- +5 pts per JD Soft keyword present in resume
-- +5 pts per matching metric type
-- +5 pts if all 4 tagbar slots map to JD signals
-- Hard miss (no prep): -10 pts | Hard miss (prep given): -5 pts
-- Soft miss: 0 pts | Nice-to-have miss: 0 pts
+- Instead of substring matching, use Claude to audit signal-to-JD alignment.
+- Score derived from: (Skill Relevance) + (Metric Importance) + (Seniority Match).
 - Cap at 100. Target: ≥90/100.
 
 ### Phase 6.10 — GitHub Push + Version Control + GH Pages

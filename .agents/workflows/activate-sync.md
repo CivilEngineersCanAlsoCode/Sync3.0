@@ -14,23 +14,32 @@ Type `/activate-sync` in any Antigravity session to trigger this workflow.
 
 // turbo-all
 
-## Step 1 — Verify bd Installation
+## Step 1 — Verify Environment & bd Installation
 
-Run `bd --version` to check if bd (Beads) is installed.
-If the command is not found, run:
+Ensure homebrew and node are installed (P0 Fresh-Device Fix):
+
+```bash
+# Check / install Homebrew
+which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Check / install Node
+which node || brew install node
+```
+
+Then check if `bd` (Beads) is installed. If the command is not found, or Version < 1.0, run:
 
 ```bash
 npm install -g @beads/cli
 bd init
 ```
 
-Then confirm with `bd --version`.
+Finally, confirm with `bd --version`.
 
 ## Step 2 — Check Sync db Context
 
-Run `bd context` to see if a Sync task graph already exists.
+Run `bd ready --json` to see if a Sync task graph already exists (PM-bae fix).
 
-If the output shows open epics starting with `PM-SYNC-`, skip to **Step 10** (returning user flow).
+If the output shows open epics starting with `PM-SYNC-` or `PM-`, skip to **Step 10** (returning user flow).
 
 If no context exists, this is a first-time setup. Proceed to Step 3.
 
@@ -94,71 +103,41 @@ bd sync
 
 Then wire all dependencies as described in `resume_customization_plan.md` Phase 0.2.
 
-## Step 4 — Check ChromaDB Status
+## Step 4 — Initialize Local ChromaDB (Zero-Docker Strategy)
 
-Run:
+Release 2 ignores Docker to prevent environment friction. We use strictly local persistent storage.
 
-```bash
-docker ps | grep chroma
-```
-
-**If ChromaDB container is NOT running**, start it with a **named volume** for persistent storage:
-
-First, detect the project root and write it to `.env` (one-time setup):
+Run this to ensure the environment is loaded (PM-a7b zsh fix):
 
 ```bash
-# Run this once from inside the project folder
-echo "SYNC_DIR=$(pwd)" >> .env
-echo "CHROMA_DATA=$(pwd)/chroma_data" >> .env
+# Load env safely even if paths have spaces
+set -a && [ -f .env ] && source .env && set +a
 ```
 
-Then start ChromaDB using the `.env` value — portable for any user, any machine:
-
-```bash
-# Load env and start ChromaDB bound to local chroma_data/
-export $(cat .env | xargs)
-docker run -d --name chroma \
-  -v "${CHROMA_DATA}:/chroma/chroma" \
-  -p 8000:8000 \
-  chromadb/chroma
-```
-
-> ✅ **Why this works for any user:** `CHROMA_DATA` is derived from `$(pwd)` when the user runs setup from inside their cloned repo. It is never hardcoded.
-> If the container already exists (stopped): `docker start chroma`
-
-**After ChromaDB is confirmed running**, perform a health check:
+Then initialize the local database:
 
 ```python
 import chromadb
-client = chromadb.HttpClient(host="localhost", port=8000)
+# Persistent storage inside the project folder
+client = chromadb.PersistentClient(path="./.chroma_db")
 col = client.get_or_create_collection("career_signals")
 count = col.count()
-print(f"ChromaDB health: {count} career signals indexed.")
+print(f"ChromaDB local health: {count} career signals indexed.")
 ```
 
-- If `count > 0` → signals are intact, proceed to Step 4b.
-- If `count == 0` and `Resume Brain/chroma_backup_*.json` exists → auto re-ingest from backup:
-  ```python
-  import json, glob
-  backup = sorted(glob.glob("Resume Brain/chroma_backup_*.json"))[-1]
-  data = json.load(open(backup))
-  col.add(documents=data["documents"], metadatas=data["metadatas"], ids=data["ids"])
-  print(f"Re-ingested {len(data['ids'])} signals from backup.")
-  ```
-- If `count == 0` and no backup exists → trigger Step 6 (full ingestion).
+> ✅ **Why this works:** No Docker Desktop required, no Google Sign-in, no port conflicts, and 100% data persistence on the local drive.
 
-**After every ingestion session (Step 6), export a JSON backup automatically:**
+If `count == 0` and `Resume Brain/chroma_backup_*.json` exists → auto re-ingest from backup:
 
 ```python
-backup_data = col.get(include=["documents", "metadatas"])
-backup_data["ids"] = col.get()["ids"]
-import json, datetime
-fname = f"Resume Brain/chroma_backup_{datetime.date.today()}.json"
-json.dump(backup_data, open(fname, "w"), indent=2)
-print(f"Backup saved: {fname}")
+import json, glob
+backup = sorted(glob.glob("Resume Brain/chroma_backup_*.json"))[-1]
+data = json.load(open(backup))
+col.add(documents=data["documents"], metadatas=data["metadatas"], ids=data["ids"])
+print(f"Re-ingested {len(data['ids'])} signals from backup.")
 ```
 
-If ChromaDB is running and healthy, proceed to Step 4b.
+If ChromaDB is healthy, proceed to Step 4b.
 
 ## Step 4b — Connect Obsidian Vault + Existing Resume ⭐ NEW
 
@@ -247,11 +226,10 @@ Run `bd sync && git push` to save state.
 
 ## Step 10 — Returning User Flow
 
-If `bd context` shows existing Sync epics, run:
+If `bd ready --json` shows existing Sync epics, run:
 
 ```bash
 bd ready --json
-bd context
 ```
 
 Display:
